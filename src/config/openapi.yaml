@@ -1,0 +1,954 @@
+openapi: 3.0.3
+
+info:
+  title: Event Registration System API
+  description: |
+    REST API for the Event Registration System.
+    - **Public** routes: Register, Login, Refresh Token
+    - **Protected** routes: Require a valid JWT access token (Bearer)
+    - **Admin** routes: Require JWT + admin role
+  version: 1.0.0
+  contact:
+    name: Abdullah Bin Mughira
+
+servers:
+  - url: http://localhost:8000/api/v1
+    description: Local Development Server
+
+# ─── Security Scheme ──────────────────────────────────────────────────────────
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  # ─── Reusable Schemas ─────────────────────────────────────────────────────
+  schemas:
+
+    # ── User ──────────────────────────────────────────────────────────────────
+    CreateUserRequest:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 10
+          example: Abdullah
+        email:
+          type: string
+          format: email
+          example: abdullah@example.com
+        password:
+          type: string
+          minLength: 8
+          example: secret123
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+
+    UpdateUserRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 10
+          example: Abdullah
+        email:
+          type: string
+          format: email
+          example: abdullah@example.com
+        password:
+          type: string
+          minLength: 8
+          example: newSecret123
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+
+    LoginUserRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          example: abdullah@example.com
+        password:
+          type: string
+          minLength: 8
+          example: secret123
+
+    ChangePasswordRequest:
+      type: object
+      required: [oldPassword, newPassword]
+      properties:
+        oldPassword:
+          type: string
+          minLength: 8
+          example: oldSecret123
+        newPassword:
+          type: string
+          minLength: 8
+          example: newSecret456
+
+    UserResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 664abc123def456789012345
+        name:
+          type: string
+          example: Abdullah
+        email:
+          type: string
+          example: abdullah@example.com
+        role:
+          type: string
+          enum: [user, admin]
+          example: user
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Event ─────────────────────────────────────────────────────────────────
+    CreateEventRequest:
+      type: object
+      required: [title, description, date, location, capacity]
+      properties:
+        title:
+          type: string
+          minLength: 5
+          example: MERN Stack Workshop
+        description:
+          type: string
+          minLength: 20
+          example: A hands-on workshop covering the full MERN stack for beginners and intermediates.
+        date:
+          type: string
+          format: date-time
+          example: "2025-12-01T10:00:00.000Z"
+        location:
+          type: string
+          minLength: 3
+          example: Faisalabad Tech Hub
+        capacity:
+          type: integer
+          minimum: 1
+          example: 100
+
+    UpdateEventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 5
+          example: MERN Stack Workshop (Updated)
+        description:
+          type: string
+          minLength: 20
+          example: Updated description for the MERN stack workshop event.
+        date:
+          type: string
+          format: date-time
+          example: "2025-12-15T10:00:00.000Z"
+        location:
+          type: string
+          minLength: 3
+          example: Lahore Innovation Center
+        capacity:
+          type: integer
+          minimum: 1
+          example: 150
+
+    EventResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 664abc123def456789012346
+        title:
+          type: string
+          example: MERN Stack Workshop
+        description:
+          type: string
+          example: A hands-on workshop covering the full MERN stack.
+        date:
+          type: string
+          format: date-time
+        location:
+          type: string
+          example: Faisalabad Tech Hub
+        capacity:
+          type: integer
+          example: 100
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Registration ──────────────────────────────────────────────────────────
+    CreateRegistrationRequest:
+      type: object
+      required: [userId, eventId]
+      properties:
+        userId:
+          type: string
+          example: 664abc123def456789012345
+        eventId:
+          type: string
+          example: 664abc123def456789012346
+
+    UpdateRegistrationRequest:
+      type: object
+      required: [status]
+      properties:
+        status:
+          type: string
+          enum: [confirmed, cancelled]
+          example: confirmed
+
+    RegistrationResponse:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: 664abc123def456789012347
+        user:
+          type: string
+          example: 664abc123def456789012345
+        event:
+          type: string
+          example: 664abc123def456789012346
+        status:
+          type: string
+          enum: [pending, confirmed, cancelled]
+          example: pending
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    # ── Common ────────────────────────────────────────────────────────────────
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        message:
+          type: string
+          example: Operation successful
+        data:
+          type: object
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        message:
+          type: string
+          example: Something went wrong
+        errors:
+          type: array
+          items:
+            type: string
+
+  # ─── Reusable Responses ───────────────────────────────────────────────────
+  responses:
+    Unauthorized:
+      description: Unauthorized – JWT token missing or invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Forbidden – Admin access required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    BadRequest:
+      description: Validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+# ─── Tags ─────────────────────────────────────────────────────────────────────
+tags:
+  - name: Health
+    description: Server health check
+  - name: Users – Public
+    description: No authentication required
+  - name: Users – Protected
+    description: Requires valid JWT (any role)
+  - name: Users – Admin
+    description: Requires JWT + admin role
+  - name: Events – Protected
+    description: Requires valid JWT (any role)
+  - name: Events – Admin
+    description: Requires JWT + admin role
+  - name: Registrations – Protected
+    description: Requires valid JWT
+
+# ─── Paths ────────────────────────────────────────────────────────────────────
+paths:
+
+  # ── Health ──────────────────────────────────────────────────────────────────
+  /health:
+    get:
+      tags: [Health]
+      summary: Health check
+      description: Returns server status. No authentication required.
+      operationId: healthcheck
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+              example:
+                success: true
+                message: Server is healthy
+                data: {}
+
+  # ── Users – Public ──────────────────────────────────────────────────────────
+  /users/create-user:
+    post:
+      tags: [Users – Public]
+      summary: Register a new user
+      operationId: createUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserRequest'
+      responses:
+        '201':
+          description: User created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+
+  /users/login-user:
+    post:
+      tags: [Users – Public]
+      summary: Login and receive access + refresh tokens
+      operationId: loginUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserRequest'
+      responses:
+        '200':
+          description: Login successful – tokens returned in cookies and body
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          user:
+                            $ref: '#/components/schemas/UserResponse'
+                          accessToken:
+                            type: string
+                          refreshToken:
+                            type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/refresh-access-token:
+    post:
+      tags: [Users – Public]
+      summary: Refresh access token using refresh token
+      operationId: refreshAccessToken
+      description: Pass the refresh token via cookie or request body.
+      responses:
+        '200':
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # ── Users – Protected ───────────────────────────────────────────────────────
+  /users/logout-user:
+    get:
+      tags: [Users – Protected]
+      summary: Logout current user
+      operationId: logoutUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Logged out successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/update-user/{id}:
+    patch:
+      tags: [Users – Protected]
+      summary: Update user profile
+      operationId: updateUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012345
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateUserRequest'
+      responses:
+        '200':
+          description: User updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /users/change-password:
+    patch:
+      tags: [Users – Protected]
+      summary: Change authenticated user's password
+      operationId: changePassword
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePasswordRequest'
+      responses:
+        '200':
+          description: Password changed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /users/delete-user/{id}:
+    delete:
+      tags: [Users – Protected]
+      summary: Delete a user account
+      operationId: deleteUser
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012345
+      responses:
+        '200':
+          description: User deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Users – Admin ───────────────────────────────────────────────────────────
+  /users/get-all-users:
+    get:
+      tags: [Users – Admin]
+      summary: Get all users (Admin only)
+      operationId: getAllUsers
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all users
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /users/get-current-user:
+    get:
+      tags: [Users – Admin]
+      summary: Get currently authenticated user (Admin only)
+      operationId: getCurrentUser
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Current user data
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/UserResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  # ── Events – Protected ──────────────────────────────────────────────────────
+  /events/get-all-events:
+    get:
+      tags: [Events – Protected]
+      summary: Get all events
+      operationId: getAllEvents
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of all events
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/EventResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /events/get-event-id/{id}:
+    get:
+      tags: [Events – Protected]
+      summary: Get a single event by ID
+      operationId: getEventById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012346
+      responses:
+        '200':
+          description: Event details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Events – Admin ──────────────────────────────────────────────────────────
+  /events/create-event:
+    post:
+      tags: [Events – Admin]
+      summary: Create a new event (Admin only)
+      operationId: createEvent
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /events/update-event/{id}:
+    put:
+      tags: [Events – Admin]
+      summary: Update an event (Admin only)
+      operationId: updateEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012346
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEventRequest'
+      responses:
+        '200':
+          description: Event updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /events/delete-event/{id}:
+    delete:
+      tags: [Events – Admin]
+      summary: Delete an event (Admin only)
+      operationId: deleteEvent
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012346
+      responses:
+        '200':
+          description: Event deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    
+  /events/generate-description/{id}:
+    post:
+      tags: [Events – Admin]
+      summary: Generate an AI-powered event description (Admin only)
+      operationId: generateEventDescription
+      description: |
+        Uses Gemini AI to generate a professional 20–30 word description
+        for the event based on its title, then updates and saves the event.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012346
+      responses:
+        '200':
+          description: Event description generated and updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/EventResponse'
+              example:
+                success: true
+                message: Event description with Ai generated successfully!
+                data:
+                  _id: 664abc123def456789012346
+                  title: MERN Stack Workshop
+                  description: Join our hands-on MERN Stack Workshop to build full-stack apps using MongoDB, Express, React, and Node.js with expert guidance.
+                  date: "2025-12-01T10:00:00.000Z"
+                  location: Faisalabad Tech Hub
+                  capacity: 100
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # ── Registrations ───────────────────────────────────────────────────────────
+  /registrations/create-registration:
+    post:
+      tags: [Registrations – Protected]
+      summary: Create a new registration
+      operationId: createRegistration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRegistrationRequest'
+      responses:
+        '201':
+          description: Registration created successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /registrations/update-registration/{id}:
+    put:
+      tags: [Registrations – Protected]
+      summary: Update registration status
+      operationId: updateRegistration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012347
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateRegistrationRequest'
+      responses:
+        '200':
+          description: Registration updated successfully
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegistrationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /registrations/delete-registration/{id}:
+    delete:
+      tags: [Registrations – Protected]
+      summary: Delete a registration
+      operationId: deleteRegistration
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012347
+      responses:
+        '200':
+          description: Registration deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /registrations/get-registration-id/{id}:
+    get:
+      tags: [Registrations – Protected]
+      summary: Get a single registration by ID
+      operationId: getRegistrationById
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          example: 664abc123def456789012347
+      responses:
+        '200':
+          description: Registration details
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/RegistrationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /registrations/get-my-registrations:
+    get:
+      tags: [Registrations – Protected]
+      summary: Get all registrations for the logged-in user
+      operationId: getMyRegistrations
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: List of user's registrations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RegistrationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /registrations/get-all-registrations:
+    get:
+      tags: [Registrations – Protected]
+      summary: Get all registrations (intended for Admin)
+      operationId: getAllRegistrations
+      security:
+        - bearerAuth: []
+      description: |
+        Note: `verifyAdmin` middleware is currently commented out in the route file.
+        All authenticated users can currently access this endpoint.
+      responses:
+        '200':
+          description: List of all registrations
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/RegistrationResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
