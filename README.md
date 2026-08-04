@@ -53,7 +53,7 @@ A REST API for managing events, user registrations, and admin operations built w
 ### Installation
 
 ```bash
-git clone https://github.com/abdullahbutt09/code-alpha-event-api.git
+git clone https://github.com/abmdevx/event-api.git
 cd code-alpha-event-api
 npm install
 ```
