@@ -54,7 +54,7 @@ A REST API for managing events, user registrations, and admin operations built w
 
 ```bash
 git clone https://github.com/abmdevx/event-api.git
-cd code-alpha-event-api
+cd event-api
 npm install
 ```
 
