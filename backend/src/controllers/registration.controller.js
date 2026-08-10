@@ -83,19 +83,21 @@ export const createRegistration = AsyncHandler(async (req, res) => {
 
   const checkregistration = await Registration.findOne({
     user: userId,
-    event: eventId
+    event: eventId,
+    status: { $ne: "cancelled" }
   })
 
-  // checking already registered
+  // checking already registered (a cancelled registration doesn't count)
   if(checkregistration) {
     throw new ApiError(400, "User already registered for this event.");
   }
 
-  //checking capacity
+  //checking capacity — cancelled registrations free up their spot
 
   const totalCapacity = event.capacity;
   const usedCapacity = await Registration.countDocuments({
-    event: eventId
+    event: eventId,
+    status: { $ne: "cancelled" }
   })
 
   if(usedCapacity >= totalCapacity) {
@@ -109,7 +111,8 @@ export const createRegistration = AsyncHandler(async (req, res) => {
   });
 
   const updatedUsedCapacity = await Registration.countDocuments({
-    event: eventId
+    event: eventId,
+    status: { $ne: "cancelled" }
   });
 
   if(!registration) {

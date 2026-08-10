@@ -1,30 +1,22 @@
 {
-  "name": "event-registration-system",
+  "name": "event-api",
   "version": "1.0.0",
-  "description": "Event Registration System",
-  "type": "module",
-  "main": "src/server.js",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
   },
-  "dependencies": {
-    "@google/genai": "^2.10.0",
-    "bcryptjs": "^3.0.3",
-    "cookie-parser": "^1.4.7",
-    "cors": "^2.8.5",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "jsonwebtoken": "^9.0.3",
-    "mongoose": "^8.4.1",
-    "swagger-ui-express": "^5.0.1",
-    "yaml": "^2.9.0",
-    "zod": "^4.4.3"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abmdevx/event-api.git"
   },
+  "keywords": [],
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/abmdevx/event-api/issues"
+  },
+  "homepage": "https://github.com/abmdevx/event-api#readme",
   "devDependencies": {
-    "nodemon": "^3.1.3"
-  },
-  "allowScripts": {
-    "@google/genai@2.10.0": true
+    "concurrently": "^9.2.1"
   }
 }
