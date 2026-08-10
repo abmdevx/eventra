@@ -112,8 +112,8 @@ export default function EventDetail() {
       </button>
 
       <Card className="overflow-hidden">
-        <div className="relative h-36 bg-gradient-to-br from-brand-900/60 via-surface-2 to-surface-1">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(239,68,68,0.3),_transparent_60%)]" />
+        <div className="relative h-36 bg-linear-to-br from-brand-900/60 via-surface-2 to-surface-1">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.3),transparent_60%)]" />
           <div className="absolute right-4 top-4">
             <Badge tone={isPast ? "neutral" : "brand"}>{isPast ? "Past event" : "Upcoming"}</Badge>
           </div>

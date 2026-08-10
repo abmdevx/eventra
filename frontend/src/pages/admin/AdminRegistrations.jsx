@@ -102,7 +102,7 @@ export default function AdminRegistrations() {
               </thead>
               <tbody className="divide-y divide-surface-border">
                 {registrations.map((reg) => (
-                  <tr key={reg._id} className="transition-colors hover:bg-white/[0.02]">
+                  <tr key={reg._id} className="transition-colors hover:bg-white/2">
                     <td className="px-5 py-3">
                       <div className="font-medium text-zinc-200">{reg.user?.name || "—"}</div>
                       <div className="text-xs text-zinc-500">{reg.user?.email}</div>
