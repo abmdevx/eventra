@@ -35,8 +35,12 @@ export default function Login() {
     <div className="flex min-h-[70vh] items-center justify-center">
       <Card className="w-full max-w-sm p-7">
         <div className="mb-6 text-center">
-          <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-brand-500 to-brand-800 font-display text-lg font-bold text-white shadow-lg shadow-brand-950/50">
-            E
+          <span className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-zinc-100 p-1 shadow-lg shadow-brand-950/50">
+            <img
+              src="/ticket-svgrepo-com.svg"
+              alt="Eventra ticket logo"
+              className="h-full w-full object-contain"
+            />
           </span>
           <h1 className="font-display text-xl font-bold text-zinc-100">Welcome back</h1>
           <p className="mt-1 text-sm text-zinc-500">Log in to manage your event registrations.</p>

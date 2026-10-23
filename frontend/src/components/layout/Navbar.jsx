@@ -26,8 +26,12 @@ export default function Navbar() {
     <header className="sticky top-0 z-40 border-b border-surface-border/80 bg-black/70 backdrop-blur-md">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6">
         <NavLink to="/" className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-brand-500 to-brand-800 font-display text-sm font-bold text-white shadow-lg shadow-brand-950/50">
-            E
+          <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-zinc-100 p-1 shadow-lg shadow-brand-950/50">
+            <img
+              src="/ticket-svgrepo-com.svg"
+              alt="Eventra ticket logo"
+              className="h-full w-full object-contain"
+            />
           </span>
           <span className="font-display text-lg font-bold tracking-tight text-white">
             Eventra

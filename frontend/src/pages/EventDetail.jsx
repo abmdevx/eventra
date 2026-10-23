@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { eventsApi, registrationsApi } from "../lib/endpoints";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
-import { formatDate } from "../lib/format";
+import { formatDateTime } from "../lib/format";
 import {
   Badge,
   Button,
@@ -102,86 +102,118 @@ export default function EventDetail() {
 
   const isPast = new Date(event.date) < new Date();
 
+  const eventDate = new Date(event.date);
+  const eventDay = eventDate.toLocaleDateString(undefined, { day: "2-digit" });
+  const eventMonth = eventDate.toLocaleDateString(undefined, { month: "short" }).toUpperCase();
+
   return (
-    <div className="animate-fade-in mx-auto max-w-3xl">
+    <div className="animate-fade-in mx-auto max-w-5xl">
       <button
         onClick={() => navigate(-1)}
-        className="mb-6 text-sm text-zinc-500 hover:text-zinc-300"
+        className="mb-5 inline-flex items-center gap-2 text-sm text-zinc-500 transition-colors hover:text-zinc-300"
       >
-        ← Back
+        <span aria-hidden="true">←</span> Back to events
       </button>
 
       <Card className="overflow-hidden">
-        <div className="relative h-36 bg-linear-to-br from-brand-900/60 via-surface-2 to-surface-1">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.3),transparent_60%)]" />
-          <div className="absolute right-4 top-4">
+        <div className="relative overflow-hidden bg-gradient-to-br from-brand-950 via-surface-2 to-surface-1 px-6 py-7 sm:px-10 sm:py-9">
+          <div className="absolute -right-20 -top-24 h-64 w-64 rounded-full bg-brand-600/20 blur-3xl" />
+          <div className="absolute -bottom-24 left-1/3 h-48 w-48 rounded-full bg-red-900/20 blur-3xl" />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-xl border border-white/15 bg-black/25 shadow-xl backdrop-blur-sm">
+                <span className="text-[10px] font-bold tracking-[0.2em] text-brand-300">{eventMonth}</span>
+                <span className="font-display text-2xl font-bold leading-none text-white">{eventDay}</span>
+              </div>
+              <div>
+                <p className="mb-1 text-xs font-medium uppercase tracking-[0.2em] text-brand-300/80">
+                  Event details
+                </p>
+                <h1 className="font-display text-2xl font-bold leading-tight text-white sm:text-4xl">
+                  {event.title}
+                </h1>
+              </div>
+            </div>
             <Badge tone={isPast ? "neutral" : "brand"}>{isPast ? "Past event" : "Upcoming"}</Badge>
           </div>
         </div>
 
-        <div className="p-6 sm:p-8">
-          <h1 className="font-display text-2xl font-bold text-zinc-100 sm:text-3xl">
-            {event.title}
-          </h1>
-          <p className="mt-3 text-sm leading-relaxed text-zinc-400">{event.description}</p>
+        <div className="grid gap-8 p-6 sm:p-8 lg:grid-cols-[1fr_280px]">
+          <div>
+            <div className="mb-7">
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-brand-400">
+                About this event
+              </p>
+              <p className="max-w-2xl text-sm leading-7 text-zinc-400">{event.description}</p>
+            </div>
 
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-surface-border bg-surface-2 p-4">
-              <div className="mb-1 flex items-center gap-1.5 text-xs text-zinc-500">
-                <CalendarIcon width={14} height={14} />
-                Date
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="rounded-xl border border-surface-border bg-surface-2/70 p-4">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-zinc-500">
+                  <CalendarIcon width={15} height={15} className="text-brand-400" />
+                  Date and time
+                </div>
+                <div className="text-sm font-medium text-zinc-200">{formatDateTime(event.date)}</div>
               </div>
-              <div className="text-sm font-medium text-zinc-200">{formatDate(event.date)}</div>
-            </div>
-            <div className="rounded-xl border border-surface-border bg-surface-2 p-4">
-              <div className="mb-1 flex items-center gap-1.5 text-xs text-zinc-500">
-                <MapPinIcon width={14} height={14} />
-                Location
+              <div className="rounded-xl border border-surface-border bg-surface-2/70 p-4">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-zinc-500">
+                  <MapPinIcon width={15} height={15} className="text-brand-400" />
+                  Location
+                </div>
+                <div className="text-sm font-medium text-zinc-200">{event.location}</div>
               </div>
-              <div className="text-sm font-medium text-zinc-200">{event.location}</div>
-            </div>
-            <div className="rounded-xl border border-surface-border bg-surface-2 p-4">
-              <div className="mb-1 flex items-center gap-1.5 text-xs text-zinc-500">
-                <UsersIcon width={14} height={14} />
-                Capacity
-              </div>
-              <div className="text-sm font-medium text-zinc-200">
-                {registeredCount !== null ? `${registeredCount} / ` : ""}
-                {event.capacity} spots
+              <div className="rounded-xl border border-surface-border bg-surface-2/70 p-4">
+                <div className="mb-2 flex items-center gap-2 text-xs font-medium text-zinc-500">
+                  <UsersIcon width={15} height={15} className="text-brand-400" />
+                  Capacity
+                </div>
+                <div className="text-sm font-medium text-zinc-200">
+                  {registeredCount !== null ? `${registeredCount} / ` : ""}
+                  {event.capacity} spots
+                </div>
               </div>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col gap-3 border-t border-surface-border pt-6 sm:flex-row sm:items-center sm:justify-between">
-            {myRegistration ? (
-              <div className="flex items-center gap-2 text-sm text-emerald-400">
-                <TicketIcon width={16} height={16} />
-                You're registered — status:{" "}
-                <Badge tone={myRegistration.status === "confirmed" ? "success" : "warning"}>
-                  {myRegistration.status}
-                </Badge>
-              </div>
-            ) : (
-              <p className="text-sm text-zinc-500">
-                {isPast ? "This event has already taken place." : "Reserve your spot below."}
+          <div className="flex flex-col justify-between rounded-2xl border border-surface-border bg-surface-2/60 p-5">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-zinc-500">
+                Your access
               </p>
-            )}
-
-            {!isPast &&
-              (isAuthenticated ? (
-                myRegistration ? (
-                  <Button variant="danger" onClick={handleCancel} loading={registering}>
-                    Cancel registration
-                  </Button>
-                ) : (
-                  <Button onClick={handleRegister} loading={registering}>
-                    <TicketIcon width={16} height={16} />
-                    Register now
-                  </Button>
-                )
+              {myRegistration ? (
+                <div className="mt-4 flex items-start gap-2 text-sm text-emerald-400">
+                  <TicketIcon width={17} height={17} className="mt-0.5 shrink-0" />
+                  <span>
+                    You're registered
+                    <span className="mt-1 block text-xs text-zinc-500">Your spot is reserved for this event.</span>
+                  </span>
+                </div>
               ) : (
-                <Button onClick={() => navigate("/login")}>Log in to register</Button>
-              ))}
+                <p className="mt-4 text-sm leading-6 text-zinc-500">
+                  {isPast ? "This event has already taken place." : "Reserve your spot before capacity runs out."}
+                </p>
+              )}
+            </div>
+
+            <div className="mt-7">
+              {!isPast &&
+                (isAuthenticated ? (
+                  myRegistration ? (
+                    <Button variant="danger" onClick={handleCancel} loading={registering} className="w-full">
+                      Cancel registration
+                    </Button>
+                  ) : (
+                    <Button onClick={handleRegister} loading={registering} className="w-full">
+                      <TicketIcon width={16} height={16} />
+                      Register now
+                    </Button>
+                  )
+                ) : (
+                  <Button onClick={() => navigate("/login")} className="w-full">
+                    Log in to register
+                  </Button>
+                ))}
+            </div>
           </div>
         </div>
       </Card>
