@@ -1,601 +1,141 @@
-# Eventra — Event Registration System
+# Eventra
 
-A full-stack **Event Registration System** built with the MERN stack. Eventra provides a modern dark-themed frontend for browsing and registering for events, along with a RESTful backend API for authentication, event management, registrations, admin operations, and AI-powered event descriptions.
+Eventra is a full-stack event registration system. Users can discover events,
+register for them, and manage their profiles. Administrators can manage events,
+users, and registrations from a dedicated dashboard.
 
----
+The repository is organized as two applications:
 
-## ✨ Features
+- **Frontend** - a React and Vite single-page application.
+- **Backend** - an Express and MongoDB REST API with JWT authentication,
+  role-based authorization, Swagger documentation, and Gemini-powered event
+  descriptions.
 
-### 👤 Authentication & Authorization
+## Features
 
-- User registration and login
-- JWT-based authentication
-- Access + refresh token flow
-- Role-based access control
-- Protected user routes
-- Admin-only routes
-- Secure logout
-- User profile management
-- Password change functionality
+- User registration, login, logout, profile updates, and password changes
+- JWT access and refresh token authentication
+- User and admin role-based route protection
+- Event browsing and event details
+- Admin event creation, editing, deletion, and capacity management
+- Event registration with duplicate and capacity checks
+- Registration history and cancellation
+- Admin views for users and registrations
+- AI-generated event descriptions with Google Gemini
+- Interactive OpenAPI documentation
+- Responsive dark red and black interface
 
-### 📅 Event Management
+## Technology
 
-- Browse available events
-- View detailed event information
-- Admin event creation
-- Admin event updates
-- Admin event deletion
-- Event capacity management
-- AI-powered event description generation
+| Area | Technologies |
+| --- | --- |
+| Frontend | React 18, Vite, React Router, Tailwind CSS v4, Axios |
+| Backend | Node.js, Express, Mongoose, MongoDB |
+| Authentication | JSON Web Tokens, bcryptjs, cookies |
+| Documentation | Swagger UI, OpenAPI 3.0.3 |
+| AI | Google Gemini API |
 
-### 📝 Event Registrations
-
-- Register for events
-- Prevent duplicate registrations
-- Enforce event capacity
-- View personal registrations
-- Admin registration management
-- Update registration status
-- Cancel registrations without removing registration history
-
-Supported registration statuses:
+## Repository structure
 
 ```text
-pending
-confirmed
-cancelled
-```
-
-### 🤖 AI Event Descriptions
-
-- Generate professional event descriptions using Google Gemini
-- Uses `gemini-2.5-flash`
-- Generated descriptions are saved directly to the event
-
-### 📚 API Documentation
-
-- Interactive Swagger/OpenAPI documentation
-- OpenAPI 3.0.3 specification
-- API documentation available directly from the running backend
-
-### 🎨 Frontend
-
-- React 18
-- Vite
-- Tailwind CSS v4
-- React Router DOM
-- Dark red/black UI
-- Responsive interface
-- Hand-built reusable components
-- Toast notifications
-- Protected routes
-- Admin routes
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-- React 18
-- Vite
-- Tailwind CSS v4
-- React Router DOM
-- JavaScript
-- Fetch API
-
-## Backend
-
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT
-- Google Gemini API
-- Swagger UI
-- OpenAPI 3.0.3
-
----
-
-# 📂 Project Structure
-
-```text
-event-api/
-│
+eventra/
 ├── backend/
-│   ├── controllers/
-│   ├── models/
-│   ├── routes/
-│   ├── validations/
-│   ├── middlewares/
-│   ├── utils/
-│   ├── openapi.yaml
-│   ├── package.json
-│   └── README.md
-│
+│   ├── src/
+│   │   ├── config/          # Database and OpenAPI configuration
+│   │   ├── controllers/     # Request handlers
+│   │   ├── middleware/      # Authentication, admin, and validation middleware
+│   │   ├── models/          # Mongoose models
+│   │   ├── routes/          # API route definitions
+│   │   ├── utils/           # Shared API and Gemini helpers
+│   │   └── validations/     # Zod request schemas
+│   ├── public/              # Backend public assets
+│   └── README.md            # Backend setup and API reference
 ├── frontend/
 │   ├── src/
-│   │   ├── components/
-│   │   │   ├── shared/
-│   │   │   └── layout/
-│   │   ├── context/
-│   │   ├── lib/
-│   │   ├── pages/
-│   │   │   ├── auth/
-│   │   │   └── admin/
-│   │   ├── App.jsx
-│   │   ├── main.jsx
-│   │   └── index.css
-│   ├── public/
-│   ├── package.json
-│   └── README.md
-│
-├── package.json
-├── package-lock.json
+│   │   ├── components/      # Shared and layout components
+│   │   ├── context/         # Authentication and toast state
+│   │   ├── lib/             # API client, endpoints, and formatters
+│   │   └── pages/           # Public, authenticated, and admin pages
+│   ├── public/              # Frontend assets
+│   └── README.md            # Frontend setup and architecture
+├── package.json             # Root development script
 └── README.md
 ```
 
----
-
-# 🚀 Getting Started
-
 ## Prerequisites
 
-Make sure you have the following installed:
+- Node.js 18 or later
+- npm
+- A MongoDB database, local or hosted with MongoDB Atlas
+- A Google Gemini API key for AI description generation
 
-- Node.js v18+
-- MongoDB (local installation or MongoDB Atlas)
-- Google Gemini API key
-- Git
+## Installation
 
----
-
-# 📥 Installation
-
-Clone the repository:
+Clone the repository and install dependencies for all three package manifests:
 
 ```bash
-git clone https://github.com/abmdevx/event-api.git
-```
-
-Navigate into the project:
-
-```bash
-cd event-api
-```
-
-Install root dependencies:
-
-```bash
+git clone https://github.com/abmdevx/eventra.git
+cd eventra
 npm install
+npm install --prefix backend
+npm install --prefix frontend
 ```
 
-Install backend dependencies:
+## Environment variables
 
-```bash
-cd backend
-npm install
-```
-
-Install frontend dependencies:
-
-```bash
-cd ../frontend
-npm install
-```
-
-Return to the root directory:
-
-```bash
-cd ..
-```
-
----
-
-# 🔐 Environment Variables
-
-The backend and frontend use separate environment files.
-
-## Backend
-
-Create:
-
-```text
-backend/.env
-```
-
-Add:
+Create `backend/.env`:
 
 ```env
 PORT=8000
-
-MONGODB_URI=your_mongodb_connection_string
-
-ACCESS_TOKEN_SECRET=your_access_token_secret
+MONGO_URI=mongodb://127.0.0.1:27017/eventra
+FRONT_END_ORIGIN=http://localhost:5173
+ACCESS_TOKEN_SECRET=replace_with_a_long_random_secret
 ACCESS_TOKEN_EXPIRY=1d
-
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_SECRET=replace_with_another_long_random_secret
 REFRESH_TOKEN_EXPIRY=10d
-
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-The backend runs by default at:
-
-```text
-http://localhost:8000
-```
-
-API base URL:
-
-```text
-http://localhost:8000/api/v1
-```
-
----
-
-## Frontend
-
-Create:
-
-```text
-frontend/.env
-```
-
-Add:
+Create `frontend/.env` only when the API is not using its default URL:
 
 ```env
 VITE_API_URL=http://localhost:8000/api/v1
 ```
 
-The frontend runs by default at:
+Do not commit either `.env` file or real credentials.
 
-```text
-http://localhost:5173
-```
+## Run the application
 
-The backend CORS configuration expects this frontend origin.
-
----
-
-# ▶️ Running the Application
-
-The root project uses `concurrently` to run both the frontend and backend development servers at the same time.
-
-From the root directory:
+From the repository root, run both development servers:
 
 ```bash
 npm run dev
 ```
 
-This starts:
-
-```text
-Frontend → http://localhost:5173
-Backend  → http://localhost:8000
-```
-
-You can therefore run the entire application using a single command.
-
----
-
-# 📜 Root Scripts
-
-The root `package.json` uses the following development script:
-
-```json
-{
-  "scripts": {
-    "dev": "concurrently \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\""
-  }
-}
-```
-
-Install `concurrently` in the root project if it is not already installed:
+Or run them separately:
 
 ```bash
-npm install -D concurrently
+npm run dev --prefix backend
+npm run dev --prefix frontend
 ```
 
----
+The default local URLs are:
 
-# 🔌 API
+- Frontend: <http://localhost:5173>
+- API: <http://localhost:8000/api/v1>
+- Swagger UI: <http://localhost:8000/api-docs>
 
-The backend API is available under:
+The backend's `FRONT_END_ORIGIN` must match the URL used by the frontend so
+that browser requests pass CORS validation.
 
-```text
-http://localhost:8000/api/v1
-```
+## Documentation
 
----
+More focused documentation is available in:
 
-## Health
+- [Frontend README](./frontend/README.md)
+- [Backend README](./backend/README.md)
+- [OpenAPI specification](./backend/src/config/openapi.yaml)
 
-| Method | Endpoint | Access | Description |
-|---|---|---|---|
-| GET | `/health` | Public | Check server status |
+## License
 
----
-
-# 👤 Users API
-
-## Public
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/users/create-user` | Register a new user |
-| POST | `/users/login-user` | Login user |
-| POST | `/users/refresh-access-token` | Refresh access token |
-
-## Protected
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/users/logout-user` | Logout current user |
-| PATCH | `/users/update-user/:id` | Update user profile |
-| PATCH | `/users/change-password` | Change password |
-| DELETE | `/users/delete-user/:id` | Delete user account |
-
-## Admin
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/users/get-all-users` | Get all users |
-| GET | `/users/get-current-user` | Get current authenticated user |
-
----
-
-# 📅 Events API
-
-## Protected
-
-| Method | Endpoint | Description |
-|---|---|---|
-| GET | `/events/get-all-events` | Get all events |
-| GET | `/events/get-event-id/:id` | Get event by ID |
-
-## Admin
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/events/create-event` | Create event |
-| PUT | `/events/update-event/:id` | Update event |
-| DELETE | `/events/delete-event/:id` | Delete event |
-| POST | `/events/generate-description/:id` | Generate AI event description |
-
----
-
-# 📝 Registrations API
-
-All registration endpoints require authentication.
-
-| Method | Endpoint | Description |
-|---|---|---|
-| POST | `/registrations/create-registration` | Register for an event |
-| PUT | `/registrations/update-registration/:id` | Update registration status |
-| DELETE | `/registrations/delete-registration/:id` | Delete registration |
-| GET | `/registrations/get-registration-id/:id` | Get registration by ID |
-| GET | `/registrations/get-my-registrations` | Get current user's registrations |
-| GET | `/registrations/get-all-registrations` | Get all registrations |
-
----
-
-# 🔑 Authentication
-
-Protected API endpoints require a valid JWT access token.
-
-The frontend sends the token using:
-
-```http
-Authorization: Bearer <access_token>
-```
-
-After login, the frontend stores the returned access token in `localStorage` and automatically attaches it to authenticated API requests.
-
-Admin routes additionally require the authenticated user to have:
-
-```text
-role: "admin"
-```
-
----
-
-# 🤖 AI Description Generation
-
-Eventra integrates Google Gemini to generate professional event descriptions.
-
-The frontend provides a **Generate with AI** button inside the admin event form.
-
-The request is sent to:
-
-```http
-POST /api/v1/events/generate-description/:id
-```
-
-The backend uses:
-
-```text
-gemini-2.5-flash
-```
-
-The generated description is saved directly to the corresponding event.
-
-The event must already exist before an AI description can be generated because the endpoint requires an existing event ID.
-
----
-
-# 🎨 Frontend Architecture
-
-The frontend is built with React and Vite.
-
-```text
-frontend/src/
-│
-├── components/
-│   ├── shared/
-│   │   ├── Button
-│   │   ├── Input
-│   │   ├── Card
-│   │   ├── Modal
-│   │   ├── Badge
-│   │   ├── EventCard
-│   │   └── Icons
-│   │
-│   └── layout/
-│       ├── Navbar
-│       ├── AppLayout
-│       ├── ProtectedRoute
-│       └── AdminRoute
-│
-├── context/
-│   ├── AuthContext
-│   └── ToastContext
-│
-├── lib/
-│   ├── api.js
-│   ├── endpoints.js
-│   └── format.js
-│
-└── pages/
-    ├── auth/
-    ├── admin/
-    ├── Home.jsx
-    ├── Events.jsx
-    ├── EventDetail.jsx
-    ├── MyRegistrations.jsx
-    ├── Profile.jsx
-    └── NotFound.jsx
-```
-
-The frontend does not use Axios or a UI component library.
-
-API communication is handled using the native `fetch` API, while reusable UI components are built within the project.
-
----
-
-# 📚 Swagger API Documentation
-
-Once the backend is running, interactive API documentation is available at:
-
-```text
-http://localhost:8000/api-docs
-```
-
-The API specification follows:
-
-```text
-OpenAPI 3.0.3
-```
-
----
-
-# 🔄 Application Architecture
-
-```text
-                    ┌─────────────────────┐
-                    │      Eventra UI     │
-                    │     React + Vite    │
-                    └──────────┬──────────┘
-                               │
-                               │ HTTP / REST
-                               ▼
-                    ┌─────────────────────┐
-                    │     Express API     │
-                    │       Node.js       │
-                    └──────────┬──────────┘
-                               │
-                 ┌─────────────┼─────────────┐
-                 │             │             │
-                 ▼             ▼             ▼
-          ┌────────────┐ ┌────────────┐ ┌────────────┐
-          │  MongoDB   │ │  Gemini AI │ │    JWT     │
-          │            │ │            │ │    Auth    │
-          └────────────┘ └────────────┘ └────────────┘
-```
-
----
-
-# 🧪 Development
-
-You can run the complete application from the root:
-
-```bash
-npm run dev
-```
-
-Or run each application independently.
-
-## Backend
-
-```bash
-cd backend
-npm run dev
-```
-
-## Frontend
-
-```bash
-cd frontend
-npm run dev
-```
-
----
-
-# 🔒 Security
-
-Do not commit environment files containing secrets.
-
-Make sure the following are included in `.gitignore`:
-
-```text
-.env
-.env.local
-.env.*.local
-node_modules/
-```
-
-Never expose or commit:
-
-- MongoDB credentials
-- JWT secrets
-- Gemini API keys
-- Private API credentials
-- Other sensitive environment variables
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-To contribute:
-
-1. Fork the repository.
-2. Create a feature branch.
-
-```bash
-git checkout -b feature/your-feature
-```
-
-3. Make your changes.
-4. Test both the frontend and backend.
-5. Commit your changes.
-
-```bash
-git add .
-git commit -m "feat: add your feature"
-```
-
-6. Push the branch.
-
-```bash
-git push origin feature/your-feature
-```
-
-7. Open a Pull Request.
-
----
-
-# 📄 License
-
-This project is currently available for development and educational purposes.
+No license file is currently included in this repository.

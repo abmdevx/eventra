@@ -1,50 +1,93 @@
-# Eventra — Frontend
+# Eventra Frontend
 
-A dark, red/black front end for the **Event Registration System API**. Built with:
+The frontend is a React single-page application for the Eventra event
+registration system. It provides the public event experience, authenticated
+user pages, and admin management screens.
 
-- **React 18 + Vite**
-- **Tailwind CSS v4** (`@import "tailwindcss";` in `src/index.css`, no `tailwind.config.js` needed — theme lives in `@theme` in the same file)
-- **react-router-dom** for routing
-- Plain `fetch` for API calls (no axios, no UI component library — every component in `src/components/shared` is hand-built)
+## Features
 
-## Getting started
+- Browse events and view event details
+- Register for events and review registration history
+- Login, registration, profile editing, and password changes
+- Protected user routes and admin-only routes
+- Admin event, user, and registration management
+- Toast notifications, loading states, confirmations, and reusable form
+  components
+- Responsive dark red and black design
+
+## Stack
+
+- React 18
+- Vite
+- React Router
+- Tailwind CSS v4
+- Axios
+
+## Setup
+
+From the repository root:
 
 ```bash
-cd frontend
-npm install
-cp .env.example .env   # point VITE_API_URL at your running backend
+npm install --prefix frontend
+```
+
+Create `frontend/.env` when the backend is not running at the default URL:
+
+```env
+VITE_API_URL=http://localhost:8000/api/v1
+```
+
+The backend must also allow the frontend origin with
+`FRONT_END_ORIGIN=http://localhost:5173`.
+
+## Development and production commands
+
+```bash
+# Start the Vite development server
 npm run dev
+
+# Create a production build
+npm run build
+
+# Preview the production build locally
+npm run preview
 ```
 
-The app runs at `http://localhost:5173` by default, which matches the `FRONT_END_ORIGIN` your backend's CORS config expects.
+The development server runs at <http://localhost:5173> by default.
 
-Make sure the backend (`event-api`) is running separately (`npm run dev` inside that project) — this is a pure front end that talks to it over HTTP.
+## Application structure
 
-## Project structure
-
-```
+```text
 src/
-  components/
-    shared/     # Button, Input, Card, Modal, Badge, EventCard, Icons... every reusable UI piece
-    layout/      # Navbar, AppLayout, ProtectedRoute, AdminRoute
-  context/       # AuthContext (session), ToastContext (notifications)
-  lib/           # api.js (fetch wrapper), endpoints.js (grouped API calls), format.js
-  pages/
-    auth/        # Login, Register
-    admin/       # AdminEvents (+ EventForm), AdminUsers, AdminRegistrations
-    Home.jsx, Events.jsx, EventDetail.jsx, MyRegistrations.jsx, Profile.jsx, NotFound.jsx
-  App.jsx        # routes
-  main.jsx       # entry point
-  index.css      # Tailwind v4 import + dark red/black theme
+├── components/
+│   ├── layout/              # App layout, navbar, and route guards
+│   └── shared/              # Reusable UI components
+├── context/
+│   ├── AuthContext.jsx      # Authentication and current-user state
+│   └── ToastContext.jsx     # Global notifications
+├── lib/
+│   ├── api.js               # Axios client and API error handling
+│   ├── endpoints.js         # Grouped backend endpoint calls
+│   └── format.js            # Display formatting helpers
+├── pages/
+│   ├── auth/                # Login and registration
+│   ├── admin/               # Admin dashboard screens and event form
+│   └── ...                  # Home, events, profile, and registrations
+├── App.jsx                  # Application routes
+├── index.css                # Tailwind import and application theme
+└── main.jsx                 # React entry point
 ```
 
-## Notes on how it maps to the backend
+## API integration
 
-- **Auth**: login stores the returned `accessToken` (localStorage) and sends it as `Authorization: Bearer <token>` on every request. `GET /users/get-current-user` is admin-only in the backend, so the logged-in user's profile is cached locally at login/update time instead.
-- **Events**: `/events/get-all-events` and `/events/get-event-id/:id` are available to any logged-in user; create/update/delete/generate-description are admin-only and live under **Manage events**.
-- **Registrations**: creating a registration posts `{ userId, eventId }` and the backend enforces capacity + duplicate checks — errors surface as toast notifications. Cancelling sets `status: "cancelled"` (matches the backend's enum) rather than deleting the record, so it stays in history.
-- **AI descriptions**: the "Generate with AI" button in the event form calls `POST /events/generate-description/:id` (Gemini) — only enabled once the event has been saved, since the endpoint needs an existing event id.
+The API client uses `VITE_API_URL`, defaulting to
+`http://localhost:8000/api/v1`. Authenticated requests send the access token
+from local storage as a Bearer token and include credentials for refresh and
+logout cookies.
 
-## Notes on running the API
+The backend must be running before using login, events, or registrations. See
+the [backend README](../backend/README.md) for database and API setup.
 
-The backend at `/api/v1` expects `MONGODB_URI`, JWT secrets, and a `GEMINI_API_KEY` in its own `.env`. See the backend's README for that setup — this frontend doesn't need anything but `VITE_API_URL`.
+## Screenshots
+
+Product screenshots are available in [`public/screenshots`](./public/screenshots).

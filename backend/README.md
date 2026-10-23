@@ -1,187 +1,118 @@
-# Event Registration System API
+# Eventra Backend
 
-A REST API for managing events, user registrations, and admin operations built with the MERN stack (Node.js, Express, MongoDB). Includes JWT-based authentication with role-based access control, full Swagger/OpenAPI documentation, and an AI-powered event description generator using Google Gemini.
+The backend is the Eventra REST API. It provides authentication, event
+management, registrations, admin operations, and AI-generated event
+descriptions.
 
----
+## Stack
 
-## ✨ Features
+- Node.js with native ES modules
+- Express
+- MongoDB with Mongoose
+- JWT and bcryptjs authentication
+- Zod request validation
+- Swagger UI and OpenAPI 3.0.3
+- Google Gemini API
 
-- 🔐 **JWT Authentication** — access + refresh token flow with secure cookie support
-- 👥 **Role-Based Access Control** — public, protected (user), and admin-only routes
-- 📅 **Event Management** — create, update, delete, and browse events
-- 📝 **Event Registrations** — users can register for events and track registration status (`pending`, `confirmed`, `cancelled`)
-- 🤖 **AI-Generated Descriptions** — auto-generate professional event descriptions using Gemini AI
-- 📚 **Swagger UI Documentation** — fully interactive API docs (OpenAPI 3.0.3)
-- ✅ **Health Check Endpoint** — quick server status check
+## Setup
 
----
-
-## 🛠️ Tech Stack
-
-- **Runtime:** Node.js
-- **Framework:** Express.js
-- **Database:** MongoDB (Mongoose)
-- **Auth:** JWT (Access + Refresh Tokens)
-- **AI:** Google Gemini API (`gemini-2.5-flash`)
-- **API Docs:** Swagger UI / OpenAPI 3.0.3
-
----
-
-## 📂 Project Structure
-
-```
-├── controllers/     # Route handler logic
-├── models/          # Mongoose schemas
-├── routes/          # Express route definitions
-├── validations/     # Request validation schemas
-├── middlewares/      # Auth (verifyJWT, verifyAdmin), error handling
-├── utils/            # ApiError, ApiResponse, AsyncHandler helpers
-├── openapi.yaml       # OpenAPI 3.0.3 spec (Swagger docs source)
-└── README.md
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js (v18+ recommended)
-- MongoDB instance (local or Atlas)
-- A Google Gemini API key
-
-### Installation
+From the repository root:
 
 ```bash
-git clone https://github.com/abmdevx/event-api.git
-cd event-api
-npm install
+npm install --prefix backend
 ```
 
-### Environment Variables
-
-Create a `.env` file in the project root:
+Create `backend/.env`:
 
 ```env
 PORT=8000
-MONGODB_URI=your_mongodb_connection_string
-ACCESS_TOKEN_SECRET=your_access_token_secret
+MONGO_URI=mongodb://127.0.0.1:27017/eventra
+FRONT_END_ORIGIN=http://localhost:5173
+ACCESS_TOKEN_SECRET=replace_with_a_long_random_secret
 ACCESS_TOKEN_EXPIRY=1d
-REFRESH_TOKEN_SECRET=your_refresh_token_secret
+REFRESH_TOKEN_SECRET=replace_with_another_long_random_secret
 REFRESH_TOKEN_EXPIRY=10d
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### Run the server
+`MONGO_URI`, both token secrets, and their expiry values are required for the
+corresponding features. `GEMINI_API_KEY` is required for AI description
+generation. Keep `.env` out of version control.
+
+## Run the API
 
 ```bash
+# Development server with nodemon
 npm run dev
+
+# Production-style Node process
+npm start
 ```
 
-Server will start at `http://localhost:8000`
+The API listens on `http://localhost:8000` by default. The port can be changed
+with `PORT`.
 
-### API Documentation
+## API documentation
 
-Once running, view the interactive Swagger docs at:
+Once the server is running, open <http://localhost:8000/api-docs> for the
+interactive Swagger UI. The source specification is
+[src/config/openapi.yaml](./src/config/openapi.yaml).
 
-```
-http://localhost:8000/api-docs
-```
+The API base URL is:
 
----
-
-## 📖 API Overview
-
-Base URL: `http://localhost:8000/api/v1`
-
-### Health
-
-| Method | Endpoint  | Access | Description         |
-|--------|-----------|--------|---------------------|
-| GET    | `/health` | Public | Server health check |
-
-### Users — Public
-
-| Method | Endpoint                         | Description                         |
-|--------|----------------------------------|-------------------------------------|
-| POST   | `/users/create-user`             | Register a new user                 |
-| POST   | `/users/login-user`              | Login, receive access/refresh tokens|
-| POST   | `/users/refresh-access-token`    | Refresh an expired access token     |
-
-### Users — Protected (requires JWT)
-
-| Method | Endpoint                        | Description                          |
-|--------|---------------------------------|--------------------------------------|
-| GET    | `/users/logout-user`            | Logout current user                  |
-| PATCH  | `/users/update-user/:id`        | Update user profile                  |
-| PATCH  | `/users/change-password`        | Change authenticated user's password |
-| DELETE | `/users/delete-user/:id`        | Delete a user account                |
-
-### Users — Admin (requires JWT + admin role)
-
-| Method | Endpoint                   | Description                           |
-|--------|----------------------------|--------------------------------------|
-| GET    | `/users/get-all-users`     | List all users                       |
-| GET    | `/users/get-current-user`  | Get currently authenticated user     |
-
-### Events — Protected (requires JWT)
-
-| Method | Endpoint                        | Description                |
-|--------|---------------------------------|----------------------------|
-| GET    | `/events/get-all-events`        | List all events            |
-| GET    | `/events/get-event-id/:id`      | Get a single event by ID   |
-
-### Events — Admin (requires JWT + admin role)
-
-| Method | Endpoint                                  | Description                                        |
-|--------|-------------------------------------------|----------------------------------------------------|
-| POST   | `/events/create-event`                    | Create a new event                                 |
-| PUT    | `/events/update-event/:id`                | Update an existing event                           |
-| DELETE | `/events/delete-event/:id`                | Delete an event                                    |
-| POST   | `/events/generate-description/:id`        | 🤖 Auto-generate an event description using Gemini AI |
-
-### Registrations (requires JWT)
-
-| Method | Endpoint                                          | Description                          |
-|--------|---------------------------------------------------|--------------------------------------|
-| POST   | `/registrations/create-registration`              | Register for an event                |
-| PUT    | `/registrations/update-registration/:id`          | Update registration status           |
-| DELETE | `/registrations/delete-registration/:id`          | Delete a registration                |
-| GET    | `/registrations/get-registration-id/:id`          | Get a single registration by ID      |
-| GET    | `/registrations/get-my-registrations`             | Get logged-in user's registrations   |
-| GET    | `/registrations/get-all-registrations`            | Get all registrations of all users   |
-
----
-
-## 🔑 Authentication
-
-Protected and admin routes require a valid JWT sent as a Bearer token:
-
-```
-Authorization: Bearer <access_token>
+```text
+http://localhost:8000/api/v1
 ```
 
-Admin routes additionally require the authenticated user to have `role: "admin"`.
+## API overview
 
----
+| Area | Examples |
+| --- | --- |
+| Health | `GET /health` |
+| Public users | `POST /users/create-user`, `POST /users/login-user`, `POST /users/refresh-access-token` |
+| Protected users | `GET /users/logout-user`, `PATCH /users/update-user/:id`, `PATCH /users/change-password`, `DELETE /users/delete-user/:id` |
+| Admin users | `GET /users/get-all-users`, `GET /users/get-current-user` |
+| Protected events | `GET /events/get-all-events`, `GET /events/get-event-id/:id` |
+| Admin events | `POST /events/create-event`, `PUT /events/update-event/:id`, `DELETE /events/delete-event/:id` |
+| AI descriptions | `POST /events/generate-description/:id` |
+| Registrations | `POST /registrations/create-registration`, `GET /registrations/get-my-registrations` |
+| Admin registrations | `GET /registrations/get-all-registrations` |
 
-## 🤖 AI Description Generation
+Protected routes expect:
 
-The `/events/generate-description/:id` endpoint uses Google's Gemini AI (`gemini-2.5-flash`) to generate a 20–30 word professional event description based on the event's title, then saves it directly to the event record.
+```text
+Authorization: Bearer <access-token>
+```
 
----
+Refresh-token and logout flows also use cookies. The frontend sends requests
+with credentials enabled.
 
-## 🤝 Contributing
+## Source structure
 
-Contributions are always welcome!
+```text
+src/
+├── app.js                 # Express middleware, routes, and Swagger UI
+├── server.js              # Environment loading, database connection, and startup
+├── config/
+│   ├── db.js              # MongoDB connection
+│   └── openapi.yaml       # OpenAPI specification
+├── controllers/           # Request and response logic
+├── middleware/            # Authentication, admin, and validation middleware
+├── models/                # User, event, and registration schemas
+├── routes/                # Route modules
+├── utils/                 # API response/error, async, and Gemini helpers
+└── validations/           # Zod request schemas
+```
 
-If you'd like to improve this project, you can:
+## Registration statuses
 
-* Add a frontend for the API.
-* Optimize the backend architecture or performance.
-* Improve validation, security, or error handling.
-* Add new features or API endpoints.
-* Enhance the documentation or README.
-* Report bugs or suggest improvements.
+Registrations use the following statuses:
 
-Feel free to fork the repository, create a new branch, and submit a pull request. All constructive contributions and feedback are appreciated.
+```text
+pending
+confirmed
+cancelled
+```
+
+Cancelling a registration preserves its history instead of removing the
+record.
