@@ -27,7 +27,6 @@ export default function EventCard({ event }) {
         <h3 className="font-display text-base font-semibold text-zinc-100 line-clamp-1">
           {event.title}
         </h3>
-        <p className="line-clamp-2 min-h-10 text-xs leading-5 text-zinc-500">{event.description}</p>
 
         <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-[11px] text-zinc-500">
           <div className="flex items-center gap-1.5">
