@@ -32,3 +32,11 @@ export function toDateTimeLocalInput(value) {
     date.getHours()
   )}:${pad(date.getMinutes())}`;
 }
+
+export function toDateInput(value) {
+  return toDateTimeLocalInput(value).split("T")[0];
+}
+
+export function toTimeInput(value) {
+  return toDateTimeLocalInput(value).split("T")[1] || "";
+}

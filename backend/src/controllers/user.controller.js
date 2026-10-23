@@ -54,18 +54,17 @@ export const createUser = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.create(req.body); res.status(201).json(user);
 
   const { name, email, password, role } = req.body;
+  const normalizedEmail = email.trim().toLowerCase();
 
-  const existedUser = await User.findOne({
-      $or : [{ name }, { email }]
-  })
+  const existedUser = await User.findOne({ email: normalizedEmail });
 
   if(existedUser) {
-    throw new ApiError(400, "User already exists.");
+    throw new ApiError(400, "An account with this email already exists.");
   }
 
   const user = await User.create({
     name,
-    email,
+    email: normalizedEmail,
     password,
     role
   });
@@ -88,8 +87,9 @@ export const loginUser = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.create(req.body); res.status(201).json(user);
 
   const { email, password } = req.body;
+  const normalizedEmail = email.trim().toLowerCase();
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: normalizedEmail });
 
   if(!user) {
     throw new ApiError(404, "User not found.");
@@ -294,6 +294,10 @@ export const deleteUser = AsyncHandler(async (req, res) => {
 
   const isAdmin = req.user.role === "admin";
   const isOwner = req.user._id.toString() === user._id.toString();
+
+  if (isAdmin && isOwner) {
+    throw new ApiError(403, "Admins cannot delete their own account.");
+  }
 
   if (!isAdmin && !isOwner) {
     throw new ApiError(403, "Access denied.");

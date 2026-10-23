@@ -30,13 +30,17 @@ export function AuthProvider({ children }) {
   };
 
   const login = async (email, password) => {
-    const data = await usersApi.login({ email, password });
+    const data = await usersApi.login({ email: email.trim().toLowerCase(), password });
     persist(data.loggedInUser, data.accessToken);
     return data.loggedInUser;
   };
 
   const register = async ({ name, email, password }) => {
-    return usersApi.create({ name, email, password, role: "user" });
+    const normalizedEmail = email.trim().toLowerCase();
+    await usersApi.create({ name: name.trim(), email: normalizedEmail, password, role: "user" });
+    const data = await usersApi.login({ email: normalizedEmail, password });
+    persist(data.loggedInUser, data.accessToken);
+    return data.loggedInUser;
   };
 
   const logout = async () => {

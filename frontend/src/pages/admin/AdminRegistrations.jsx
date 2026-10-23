@@ -1,93 +1,117 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { registrationsApi } from "../../lib/endpoints";
-import { useToast } from "../../context/ToastContext";
-import { formatDate } from "../../lib/format";
+import { formatDateTime } from "../../lib/format";
 import {
-  Button,
+  Badge,
   Card,
-  ConfirmDialog,
   EmptyState,
+  Input,
+  SearchIcon,
   Spinner,
   TicketIcon,
-  TrashIcon,
 } from "../../components/shared";
 
-const STATUSES = ["confirmed", "cancelled"];
+const statusTone = { confirmed: "success", pending: "warning", cancelled: "neutral" };
 
 export default function AdminRegistrations() {
-  const toast = useToast();
   const [registrations, setRegistrations] = useState([]);
+  const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deleteTarget, setDeleteTarget] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [updatingId, setUpdatingId] = useState(null);
-
-  const load = async () => {
-    setLoading(true);
-    try {
-      const data = await registrationsApi.getAll();
-      setRegistrations(data || []);
-    } catch (err) {
-      setError(err.message || "Failed to load registrations");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
-    load();
+    let mounted = true;
+
+    (async () => {
+      try {
+        const data = await registrationsApi.getAll();
+        if (mounted) setRegistrations(data || []);
+      } catch (err) {
+        if (mounted) setError(err.message || "Failed to load activity");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const handleStatusChange = async (reg, status) => {
-    if (status === reg.status) return;
-    setUpdatingId(reg._id);
-    try {
-      await registrationsApi.update(reg._id, { status });
-      toast.success("Status updated");
-      load();
-    } catch (err) {
-      toast.error(err.message || "Could not update status");
-    } finally {
-      setUpdatingId(null);
-    }
-  };
+  const activities = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return;
-    setDeleting(true);
-    try {
-      await registrationsApi.remove(deleteTarget._id);
-      toast.success("Registration deleted");
-      setDeleteTarget(null);
-      load();
-    } catch (err) {
-      toast.error(err.message || "Could not delete registration");
-    } finally {
-      setDeleting(false);
-    }
-  };
+    return [...registrations]
+      .sort(
+        (a, b) =>
+          new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt)
+      )
+      .filter((registration) => {
+        if (!normalizedQuery) return true;
+        const searchableText = [
+          registration.user?.name,
+          registration.user?.email,
+          registration.event?.title,
+          registration.status,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedQuery);
+      });
+  }, [registrations, query]);
 
   return (
     <div className="animate-fade-in">
-      <div className="mb-8">
-        <h1 className="font-display text-2xl font-bold text-zinc-100 sm:text-3xl">
-          All registrations
-        </h1>
-        <p className="mt-1 text-sm text-zinc-500">Review and manage every registration across events.</p>
+      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="font-display text-2xl font-bold text-zinc-100 sm:text-3xl">
+            Activity
+          </h1>
+          <p className="mt-1 text-sm text-zinc-500">
+            View registration and cancellation activity across all users.
+          </p>
+        </div>
+        <div className="relative">
+          <SearchIcon
+            width={16}
+            height={16}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-zinc-600"
+          />
+          <Input
+            aria-label="Search activity"
+            placeholder="Search users or events..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="pl-9 sm:w-72"
+          />
+        </div>
       </div>
 
       {loading && <Spinner full />}
 
       {!loading && error && (
-        <EmptyState icon={<TicketIcon width={22} height={22} />} title="Something went wrong" description={error} />
+        <EmptyState
+          icon={<TicketIcon width={22} height={22} />}
+          title="Something went wrong"
+          description={error}
+        />
       )}
 
-      {!loading && !error && registrations.length === 0 && (
-        <EmptyState icon={<TicketIcon width={22} height={22} />} title="No registrations yet" />
+      {!loading && !error && activities.length === 0 && (
+        <EmptyState
+          icon={<TicketIcon width={22} height={22} />}
+          title={query ? "No matching activity" : "No activity yet"}
+          description={
+            query
+              ? "Try searching by user, email, event, or status."
+              : "Registration and cancellation activity will appear here."
+          }
+        />
       )}
 
-      {!loading && !error && registrations.length > 0 && (
+      {!loading && !error && activities.length > 0 && (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -95,39 +119,31 @@ export default function AdminRegistrations() {
                 <tr>
                   <th className="px-5 py-3 font-medium">User</th>
                   <th className="px-5 py-3 font-medium">Event</th>
-                  <th className="px-5 py-3 font-medium">Registered</th>
+                  <th className="px-5 py-3 font-medium">Activity time</th>
                   <th className="px-5 py-3 font-medium">Status</th>
-                  <th className="px-5 py-3 font-medium text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
-                {registrations.map((reg) => (
-                  <tr key={reg._id} className="transition-colors hover:bg-white/2">
+                {activities.map((registration) => (
+                  <tr key={registration._id} className="transition-colors hover:bg-white/[0.02]">
                     <td className="px-5 py-3">
-                      <div className="font-medium text-zinc-200">{reg.user?.name || "—"}</div>
-                      <div className="text-xs text-zinc-500">{reg.user?.email}</div>
+                      <div className="font-medium text-zinc-200">
+                        {registration.user?.name || "User removed"}
+                      </div>
+                      <div className="text-xs text-zinc-500">
+                        {registration.user?.email || "—"}
+                      </div>
                     </td>
-                    <td className="px-5 py-3 text-zinc-300">{reg.event?.title || "—"}</td>
-                    <td className="px-5 py-3 text-zinc-500">{formatDate(reg.createdAt)}</td>
+                    <td className="px-5 py-3 text-zinc-300">
+                      {registration.event?.title || "Event removed"}
+                    </td>
+                    <td className="px-5 py-3 text-zinc-500">
+                      {formatDateTime(registration.updatedAt || registration.createdAt)}
+                    </td>
                     <td className="px-5 py-3">
-                      <select
-                        value={reg.status}
-                        disabled={updatingId === reg._id}
-                        onChange={(e) => handleStatusChange(reg, e.target.value)}
-                        className="rounded-lg border border-surface-border bg-surface-2 px-2.5 py-1.5 text-xs text-zinc-200 focus:outline-none focus:ring-2 focus:ring-brand-900/40 disabled:opacity-50"
-                      >
-                        {[...new Set([reg.status, ...STATUSES])].map((s) => (
-                          <option key={s} value={s}>
-                            {s}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="px-5 py-3 text-right">
-                      <Button variant="danger" size="sm" onClick={() => setDeleteTarget(reg)}>
-                        <TrashIcon width={13} height={13} />
-                        Delete
-                      </Button>
+                      <Badge tone={statusTone[registration.status] || "neutral"}>
+                        {registration.status}
+                      </Badge>
                     </td>
                   </tr>
                 ))}
@@ -136,16 +152,6 @@ export default function AdminRegistrations() {
           </div>
         </Card>
       )}
-
-      <ConfirmDialog
-        open={Boolean(deleteTarget)}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        loading={deleting}
-        title="Delete registration"
-        message="This will permanently remove this registration record."
-        confirmLabel="Delete registration"
-      />
     </div>
   );
 }

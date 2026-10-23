@@ -1,9 +1,22 @@
 import { useEffect, useState } from "react";
 import { eventsApi } from "../../lib/endpoints";
-import { toDateTimeLocalInput } from "../../lib/format";
+import { toDateInput, toTimeInput } from "../../lib/format";
 import { Button, Input, Textarea, Alert, SparklesIcon } from "../../components/shared";
 
-const emptyForm = { title: "", description: "", date: "", location: "", capacity: 20 };
+const emptyForm = {
+  title: "",
+  description: "",
+  date: "",
+  time: "",
+  location: "",
+  capacity: 20,
+};
+
+function getTodayInputValue() {
+  const today = new Date();
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+}
 
 export default function EventForm({ event, onSaved, onCancel }) {
   const [form, setForm] = useState(emptyForm);
@@ -16,7 +29,8 @@ export default function EventForm({ event, onSaved, onCancel }) {
       setForm({
         title: event.title || "",
         description: event.description || "",
-        date: toDateTimeLocalInput(event.date),
+        date: toDateInput(event.date),
+        time: toTimeInput(event.date),
         location: event.location || "",
         capacity: event.capacity ?? 20,
       });
@@ -59,7 +73,12 @@ export default function EventForm({ event, onSaved, onCancel }) {
       setError("Description must be at least 20 characters.");
       return;
     }
-    if (!form.date || new Date(form.date) <= new Date()) {
+    if (!form.date || !form.time) {
+      setError("Please select both a date and time.");
+      return;
+    }
+    const eventDate = new Date(`${form.date}T${form.time}`);
+    if (Number.isNaN(eventDate.getTime()) || eventDate <= new Date()) {
       setError("Date must be in the future.");
       return;
     }
@@ -77,7 +96,7 @@ export default function EventForm({ event, onSaved, onCancel }) {
       const payload = {
         title: form.title.trim(),
         description: form.description.trim(),
-        date: new Date(form.date).toISOString(),
+        date: eventDate.toISOString(),
         location: form.location.trim(),
         capacity: form.capacity,
       };
@@ -121,14 +140,25 @@ export default function EventForm({ event, onSaved, onCancel }) {
         />
       </div>
 
-      <Input
-        label="Date & time"
-        type="datetime-local"
-        name="date"
-        value={form.date}
-        onChange={onChange}
-        required
-      />
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Input
+          label="Event date"
+          type="date"
+          name="date"
+          min={getTodayInputValue()}
+          value={form.date}
+          onChange={onChange}
+          required
+        />
+        <Input
+          label="Event time"
+          type="time"
+          name="time"
+          value={form.time}
+          onChange={onChange}
+          required
+        />
+      </div>
       <Input label="Location" name="location" value={form.location} onChange={onChange} required />
       <Input
         label="Capacity"

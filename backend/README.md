@@ -2,7 +2,7 @@
 
 The backend is the Eventra REST API. It provides authentication, event
 management, registrations, admin operations, and AI-generated event
-descriptions.
+descriptions. Admins can also register for events as participants.
 
 ## Stack
 
@@ -76,7 +76,7 @@ http://localhost:8000/api/v1
 | Admin events | `POST /events/create-event`, `PUT /events/update-event/:id`, `DELETE /events/delete-event/:id` |
 | AI descriptions | `POST /events/generate-description/:id` |
 | Registrations | `POST /registrations/create-registration`, `GET /registrations/get-my-registrations` |
-| Admin registrations | `GET /registrations/get-all-registrations` |
+| Admin activity | `GET /registrations/get-all-registrations` (read-only overview of all users' registration records) |
 
 Protected routes expect:
 
@@ -115,4 +115,5 @@ cancelled
 ```
 
 Cancelling a registration preserves its history instead of removing the
-record.
+record. The admin activity endpoint exposes those registration records for
+review; it is not an append-only audit log of every historical status change.

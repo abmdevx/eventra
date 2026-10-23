@@ -48,11 +48,11 @@ export default function Navbar() {
               <NavLink to="/admin/events" className={linkClass}>
                 Manage Events
               </NavLink>
-              <NavLink to="/admin/registrations" className={linkClass}>
-                Registrations
-              </NavLink>
               <NavLink to="/admin/users" className={linkClass}>
                 Users
+              </NavLink>
+              <NavLink to="/admin/registrations" className={linkClass}>
+                Activity
               </NavLink>
             </>
           )}
@@ -120,15 +120,15 @@ export default function Navbar() {
                 <NavLink to="/admin/events" className={linkClass} onClick={() => setMenuOpen(false)}>
                   Manage Events
                 </NavLink>
+                <NavLink to="/admin/users" className={linkClass} onClick={() => setMenuOpen(false)}>
+                  Users
+                </NavLink>
                 <NavLink
                   to="/admin/registrations"
                   className={linkClass}
                   onClick={() => setMenuOpen(false)}
                 >
-                  Registrations
-                </NavLink>
-                <NavLink to="/admin/users" className={linkClass} onClick={() => setMenuOpen(false)}>
-                  Users
+                  Activity
                 </NavLink>
               </>
             )}

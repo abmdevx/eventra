@@ -34,9 +34,9 @@ export default function Register() {
 
     setLoading(true);
     try {
-      await register(form);
-      toast.success("Account created — please log in.");
-      navigate("/login");
+      const user = await register(form);
+      toast.success(`Welcome to Eventra, ${user.name.split(" ")[0]}!`);
+      navigate("/events", { replace: true });
     } catch (err) {
       setError(err.message || "Registration failed");
     } finally {

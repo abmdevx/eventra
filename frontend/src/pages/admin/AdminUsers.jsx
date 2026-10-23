@@ -89,8 +89,10 @@ export default function AdminUsers() {
                   <tr key={u._id} className="transition-colors hover:bg-white/[0.02]">
                     <td className="px-5 py-3 font-medium text-zinc-200">
                       {u.name}
-                      {u._id === currentUser?._id && (
-                        <span className="ml-2 text-xs text-zinc-600">(you)</span>
+                      {String(u._id) === String(currentUser?._id) && (
+                        <Badge tone="success" className="ml-2">
+                          Your account
+                        </Badge>
                       )}
                     </td>
                     <td className="px-5 py-3 text-zinc-400">{u.email}</td>
@@ -99,10 +101,17 @@ export default function AdminUsers() {
                     </td>
                     <td className="px-5 py-3 text-zinc-500">{formatDate(u.createdAt)}</td>
                     <td className="px-5 py-3 text-right">
-                      <Button variant="danger" size="sm" onClick={() => setDeleteTarget(u)}>
-                        <TrashIcon width={13} height={13} />
-                        Delete
-                      </Button>
+                      {String(u._id) === String(currentUser?._id) ? (
+                        <Button variant="danger" size="sm" disabled title="Admins cannot delete their own account">
+                          <TrashIcon width={13} height={13} />
+                          Delete
+                        </Button>
+                      ) : (
+                        <Button variant="danger" size="sm" onClick={() => setDeleteTarget(u)}>
+                          <TrashIcon width={13} height={13} />
+                          Delete
+                        </Button>
+                      )}
                     </td>
                   </tr>
                 ))}

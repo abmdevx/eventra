@@ -33,14 +33,6 @@ app.use(express.urlencoded({
    limit: "16kb"
 }))
 
-app.use((err, req, res, next) => {
-   res.status(err.statusCode || 500).json({
-      success: false,
-      message: err.message || "Internal Server Error",
-      errors: err.errors || []
-   });
-});
-
 app.use(cookieParser());
 
 // After your existing middleware setup (after cookieParser line)
@@ -57,6 +49,14 @@ app.use("/api/v1/events", eventRoute);
 app.use("/api/v1/registrations", registrationRoute);
 app.use("/api/v1/health", healthRoute);
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use((err, req, res, next) => {
+   res.status(err.statusCode || 500).json({
+      success: false,
+      message: err.message || "Internal Server Error",
+      errors: err.errors || []
+   });
+});
 
 export default app;
 

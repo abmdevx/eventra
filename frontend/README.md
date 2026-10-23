@@ -8,9 +8,11 @@ user pages, and admin management screens.
 
 - Browse events and view event details
 - Register for events and review registration history
+- View separate active registrations and personal activity tabs
 - Login, registration, profile editing, and password changes
 - Protected user routes and admin-only routes
-- Admin event, user, and registration management
+- Admin event and user management
+- Read-only, searchable admin activity feed for all registrations and cancellations
 - Toast notifications, loading states, confirmations, and reusable form
   components
 - Responsive dark red and black design
@@ -87,6 +89,17 @@ logout cookies.
 
 The backend must be running before using login, events, or registrations. See
 the [backend README](../backend/README.md) for database and API setup.
+
+## Roles and registration behavior
+
+Admins use the same participant features as regular users: they can browse
+events, register for events, cancel their own registrations, and review their
+personal registration history.
+
+Admin-only screens are available for event management, user management, and a
+read-only searchable Activity page. The Activity page shows all users'
+registration records, sorted by the latest record update, without status or
+delete controls.
 
 ## Screenshots
 

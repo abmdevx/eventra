@@ -1,8 +1,9 @@
 # Eventra
 
 Eventra is a full-stack event registration system. Users can discover events,
-register for them, and manage their profiles. Administrators can manage events,
-users, and registrations from a dedicated dashboard.
+register for them, and manage their profiles. Administrators can participate in
+events as users while also managing events and reviewing activity from a
+dedicated dashboard.
 
 The repository is organized as two applications:
 
@@ -20,7 +21,7 @@ The repository is organized as two applications:
 - Admin event creation, editing, deletion, and capacity management
 - Event registration with duplicate and capacity checks
 - Registration history and cancellation
-- Admin views for users and registrations
+- Admin views for users and read-only registration activity
 - AI-generated event descriptions with Google Gemini
 - Interactive OpenAPI documentation
 - Responsive dark red and black interface
@@ -68,6 +69,20 @@ eventra/
 - npm
 - A MongoDB database, local or hosted with MongoDB Atlas
 - A Google Gemini API key for AI description generation
+
+## Roles and permissions
+
+Both users and admins can browse events, register for events, cancel their own
+registrations, and view their personal registration history.
+
+Admins additionally can:
+
+- Create, edit, and delete events
+- View all registered users
+- View all registration activity in the read-only, searchable Activity page
+
+The admin Activity page does not provide status-changing or deletion actions.
+An admin cannot delete their own account.
 
 ## Installation
 
