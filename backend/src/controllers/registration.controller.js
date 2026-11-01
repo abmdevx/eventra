@@ -4,6 +4,7 @@ import Event from "../models/event.model.js";
 import ApiError from "../utils/apiError.js"
 import ApiResponse from "../utils/apiResponse.js"
 import AsyncHandler from "../utils/asyncHandler.js";
+import { recordAudit } from "../utils/audit.js";
 
 // @desc  GET /api/registrations
 export const getAllRegistrations = AsyncHandler(async (req, res) => {
@@ -119,6 +120,13 @@ export const createRegistration = AsyncHandler(async (req, res) => {
     throw new ApiError(500, "Registration not created.");
   }
 
+  await recordAudit(req, {
+    action: "created",
+    resource: "registration",
+    resourceId: registration._id.toString(),
+    details: `User ${user.email} registered for "${event.title}".`,
+  });
+
   return res
   .status(201)
   .json(new ApiResponse(
@@ -144,12 +152,15 @@ export const updateRegistration = AsyncHandler(async (req, res) => {
   //   throw new ApiError(403, "Access denied.");
   // }
 
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = ["admin", "owner"].includes(req.user.role);
   const isOwner = registration.user.equals(req.user._id);
 
 
   if (!isAdmin && !isOwner) {
     throw new ApiError(403, "Access denied.");
+  }
+  if (isAdmin && req.user.role !== "owner" && req.user.permissions?.registrations?.update !== true) {
+    throw new ApiError(403, "You do not have permission to update registrations.");
   }
 
   const updatedRegistration = await Registration.findByIdAndUpdate(
@@ -161,6 +172,15 @@ export const updateRegistration = AsyncHandler(async (req, res) => {
       new: true,
     }
   );
+
+  if (status === "cancelled") {
+    await recordAudit(req, {
+      action: "cancelled",
+      resource: "registration",
+      resourceId: registration._id.toString(),
+      details: `Registration ${registration._id} was cancelled.`,
+    });
+  }
 
   return res
   .status(200)
@@ -181,11 +201,14 @@ export const deleteRegistration = AsyncHandler(async (req, res) => {
       throw new ApiError(404, "Registration not found.");
     }
 
-    const isAdmin = req.user.role === "admin";
+    const isAdmin = ["admin", "owner"].includes(req.user.role);
     const isOwner = registration.user.equals(req.user._id);
 
     if (!isAdmin && !isOwner) {
       throw new ApiError(403, "Access denied.");
+    }
+    if (isAdmin && req.user.role !== "owner" && req.user.permissions?.registrations?.delete !== true) {
+      throw new ApiError(403, "You do not have permission to delete registrations.");
     }
 
     await Registration.findByIdAndDelete(req.params.id);

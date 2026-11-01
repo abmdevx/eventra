@@ -32,6 +32,7 @@ ACCESS_TOKEN_SECRET=replace_with_a_long_random_secret
 ACCESS_TOKEN_EXPIRY=1d
 REFRESH_TOKEN_SECRET=replace_with_another_long_random_secret
 REFRESH_TOKEN_EXPIRY=10d
+OWNER_EMAIL=owner@example.com
 GEMINI_API_KEY=your_gemini_api_key
 ```
 
@@ -71,12 +72,12 @@ http://localhost:8000/api/v1
 | Health | `GET /health` |
 | Public users | `POST /users/create-user`, `POST /users/login-user`, `POST /users/refresh-access-token` |
 | Protected users | `GET /users/logout-user`, `PATCH /users/update-user/:id`, `PATCH /users/change-password`, `DELETE /users/delete-user/:id` |
-| Admin users | `GET /users/get-all-users`, `GET /users/get-current-user` |
+| Admin and owner users | `GET /users/get-all-users`, `GET /users/get-current-user`, `PATCH /users/owner/users/:id/access`, `GET /users/owner/activity` |
 | Protected events | `GET /events/get-all-events`, `GET /events/get-event-id/:id` |
 | Admin events | `POST /events/create-event`, `PUT /events/update-event/:id`, `DELETE /events/delete-event/:id` |
 | AI descriptions | `POST /events/generate-description/:id` |
 | Registrations | `POST /registrations/create-registration`, `GET /registrations/get-my-registrations` |
-| Admin activity | `GET /registrations/get-all-registrations` (read-only overview of all users' registration records) |
+| Admin user activity | `GET /registrations/get-all-registrations` (read-only overview of users' registration records) |
 
 Protected routes expect:
 
@@ -98,7 +99,7 @@ src/
 │   └── openapi.yaml       # OpenAPI specification
 ├── controllers/           # Request and response logic
 ├── middleware/            # Authentication, admin, and validation middleware
-├── models/                # User, event, and registration schemas
+├── models/                # User, event, registration, and audit schemas
 ├── routes/                # Route modules
 ├── utils/                 # API response/error, async, and Gemini helpers
 └── validations/           # Zod request schemas
@@ -115,5 +116,6 @@ cancelled
 ```
 
 Cancelling a registration preserves its history instead of removing the
-record. The admin activity endpoint exposes those registration records for
-review; it is not an append-only audit log of every historical status change.
+record. The admin user activity endpoint exposes those registration records for
+review. Owner admin activity is stored separately in the audit log and records
+admin event creation, updates, and deletions.

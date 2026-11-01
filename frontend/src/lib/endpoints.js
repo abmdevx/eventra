@@ -12,6 +12,8 @@ export const usersApi = {
   remove: (id) => api.delete(`/users/delete-user/${id}`),
   getAll: () => api.get("/users/get-all-users"),
   getCurrent: () => api.get("/users/get-current-user"),
+  updateAccess: (id, data) => api.patch(`/users/owner/users/${id}/access`, data),
+  getOwnerActivity: () => api.get("/users/owner/activity"),
 };
 
 // ---- Events ----

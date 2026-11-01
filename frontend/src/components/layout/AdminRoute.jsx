@@ -11,8 +11,8 @@ export default function AdminRoute() {
     return (
       <EmptyState
         icon={<ShieldIcon width={22} height={22} />}
-        title="Admins only"
-        description="You need an admin account to view this page."
+        title="Staff only"
+        description="You need an admin or owner account to view this page."
       />
     );
   }

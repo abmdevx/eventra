@@ -11,7 +11,7 @@ const linkClass = ({ isActive }) =>
   ].join(" ");
 
 export default function Navbar() {
-  const { isAuthenticated, isAdmin, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isOwner, user, logout } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -56,8 +56,14 @@ export default function Navbar() {
                 Users
               </NavLink>
               <NavLink to="/admin/registrations" className={linkClass}>
-                Activity
+                User activity
               </NavLink>
+              {isOwner && (
+                <>
+                  <NavLink to="/owner" className={linkClass}>Owner dashboard</NavLink>
+                  <NavLink to="/owner/activity" className={linkClass}>Admin activity</NavLink>
+                </>
+              )}
             </>
           )}
         </nav>
@@ -132,8 +138,14 @@ export default function Navbar() {
                   className={linkClass}
                   onClick={() => setMenuOpen(false)}
                 >
-                  Activity
+                  User activity
                 </NavLink>
+                {isOwner && (
+                  <>
+                    <NavLink to="/owner" className={linkClass} onClick={() => setMenuOpen(false)}>Owner dashboard</NavLink>
+                    <NavLink to="/owner/activity" className={linkClass} onClick={() => setMenuOpen(false)}>Admin activity</NavLink>
+                  </>
+                )}
               </>
             )}
             {isAuthenticated ? (

@@ -1,5 +1,5 @@
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { verifyAdmin } from "../middleware/admin.middleware.js";
+import { verifyAdmin, requirePermission } from "../middleware/admin.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 
 import {
@@ -26,7 +26,6 @@ router.route("/delete-registration/:id").delete(deleteRegistration);
 router.route("/get-registration-id/:id").get(getRegistrationById);
 router.route("/get-my-registrations").get(getMyRegistrations);
 
-router.use(verifyAdmin)
-router.route("/get-all-registrations").get(getAllRegistrations);
+router.route("/get-all-registrations").get(verifyAdmin, requirePermission("registrations", "read"), getAllRegistrations);
 
 export default router;

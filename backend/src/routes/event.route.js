@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { verifyAdmin } from "../middleware/admin.middleware.js";
+import { verifyAdmin, requirePermission } from "../middleware/admin.middleware.js";
 import { verifyJWT } from "../middleware/auth.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 
@@ -24,9 +24,9 @@ router.route("/get-all-events").get(getAllEvents);
 router.route("/get-event-id/:id").get(getEventById);
 
 router.use(verifyAdmin);
-router.route("/create-event").post(validate(createEventSchema), createEvent);
-router.route("/update-event/:id").put(validate(updateEventSchema), updateEvent);
-router.route("/delete-event/:id").delete(deleteEvent);
-router.route("/generate-description/:id").post(writeEventMessage)
+router.route("/create-event").post(requirePermission("events", "create"), validate(createEventSchema), createEvent);
+router.route("/update-event/:id").put(requirePermission("events", "update"), validate(updateEventSchema), updateEvent);
+router.route("/delete-event/:id").delete(requirePermission("events", "delete"), deleteEvent);
+router.route("/generate-description/:id").post(requirePermission("events", "update"), writeEventMessage)
 
 export default router;

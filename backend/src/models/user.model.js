@@ -21,8 +21,29 @@ const userSchema = new Schema(
 
     role:{
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "admin", "owner"],
       default: "user"
+    },
+
+    permissions: {
+      events: {
+        read: { type: Boolean, default: false },
+        create: { type: Boolean, default: false },
+        update: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false }
+      },
+      users: {
+        read: { type: Boolean, default: false },
+        create: { type: Boolean, default: false },
+        update: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false }
+      },
+      registrations: {
+        read: { type: Boolean, default: false },
+        create: { type: Boolean, default: false },
+        update: { type: Boolean, default: false },
+        delete: { type: Boolean, default: false }
+      }
     },
 
     password:{

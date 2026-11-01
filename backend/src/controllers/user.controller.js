@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken"
 import AsyncHandler from "../utils/asyncHandler.js";
 import ApiError from "../utils/apiError.js"
 import ApiResponse from "../utils/apiResponse.js"
+import AuditLog from "../models/auditLog.model.js";
 const generateTokens = async(userId) => {
     try {
         const user = await User.findById(userId);
@@ -53,7 +54,7 @@ export const getCurrentUser = AsyncHandler(async (req, res) => {
 export const createUser = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.create(req.body); res.status(201).json(user);
 
-  const { name, email, password, role } = req.body;
+  const { name, email, password } = req.body;
   const normalizedEmail = email.trim().toLowerCase();
 
   const existedUser = await User.findOne({ email: normalizedEmail });
@@ -62,11 +63,13 @@ export const createUser = AsyncHandler(async (req, res) => {
     throw new ApiError(400, "An account with this email already exists.");
   }
 
+  const userCount = await User.countDocuments();
+  const isConfiguredOwner = process.env.OWNER_EMAIL?.trim().toLowerCase() === normalizedEmail;
   const user = await User.create({
     name,
     email: normalizedEmail,
     password,
-    role
+    role: userCount === 0 || isConfiguredOwner ? "owner" : "user"
   });
 
   if(!user) {
@@ -93,6 +96,11 @@ export const loginUser = AsyncHandler(async (req, res) => {
 
   if(!user) {
     throw new ApiError(404, "User not found.");
+  }
+
+  if (process.env.OWNER_EMAIL?.trim().toLowerCase() === normalizedEmail && user.role !== "owner") {
+    user.role = "owner";
+    await user.save();
   }
 
   const isPasswordCorrect = await user.comparePassword(password);
@@ -170,6 +178,13 @@ export const updateUser = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
 
   const { name, email } = req.body;
+
+  const isSelf = req.user._id.toString() === req.params.id;
+  const canManageUsers = req.user.role === "owner" ||
+    (req.user.role === "admin" && req.user.permissions?.users?.update === true);
+  if (!isSelf && !canManageUsers) {
+    throw new ApiError(403, "You do not have permission to update this user.");
+  }
 
   // check here if email, name already exists
 
@@ -292,15 +307,18 @@ export const deleteUser = AsyncHandler(async (req, res) => {
     throw new ApiError(404, "User not found.");
   }
 
-  const isAdmin = req.user.role === "admin";
+  const isAdmin = ["admin", "owner"].includes(req.user.role);
   const isOwner = req.user._id.toString() === user._id.toString();
 
-  if (isAdmin && isOwner) {
-    throw new ApiError(403, "Admins cannot delete their own account.");
+  if (isOwner && isAdmin) {
+    throw new ApiError(403, "Admins and owners cannot delete their own account.");
   }
 
   if (!isAdmin && !isOwner) {
     throw new ApiError(403, "Access denied.");
+  }
+  if (req.user.role === "admin" && req.user.permissions?.users?.delete !== true) {
+    throw new ApiError(403, "You do not have permission to delete users.");
   }
 
   await User.findByIdAndDelete(req.params.id);
@@ -315,4 +333,52 @@ export const deleteUser = AsyncHandler(async (req, res) => {
         "User deleted successfully!"
       )
     );
+});
+
+export const updateAdminAccess = AsyncHandler(async (req, res) => {
+  const { role, permissions } = req.body;
+  const user = await User.findById(req.params.id);
+
+  if (!user) throw new ApiError(404, "User not found.");
+  if (user._id.equals(req.user._id)) throw new ApiError(400, "You cannot change your own owner access.");
+  if (user.role === "owner") throw new ApiError(403, "Owner access cannot be changed.");
+  if (role !== "user" && role !== "admin") throw new ApiError(400, "Role must be user or admin.");
+
+  user.role = role;
+  if (role === "admin") {
+    const resources = ["events", "users", "registrations"];
+    const actions = ["read", "create", "update", "delete"];
+    user.permissions = Object.fromEntries(
+      resources.map((resource) => [
+        resource,
+        Object.fromEntries(actions.map((action) => [
+          action,
+          permissions?.[resource]?.[action] === true,
+        ])),
+      ])
+    );
+  } else {
+    user.set("permissions", undefined);
+  }
+  await user.save();
+
+  await AuditLog.create({
+    actor: req.user._id,
+    actorRole: req.user.role,
+    action: role === "admin" ? "assigned_admin" : "removed_admin",
+    resource: "user",
+    resourceId: user._id.toString(),
+    details: `${role === "admin" ? "Assigned admin role to" : "Removed admin role from"} ${user.email}.`,
+  });
+
+  return res.status(200).json(new ApiResponse(200, user, "Admin access updated successfully."));
+});
+
+export const getOwnerActivity = AsyncHandler(async (req, res) => {
+  const activity = await AuditLog.find({ actorRole: "admin" })
+    .populate("actor", "name email")
+    .sort({ createdAt: -1 })
+    .limit(250);
+
+  return res.status(200).json(new ApiResponse(200, activity, "Admin activity found successfully."));
 });

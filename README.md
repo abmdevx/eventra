@@ -1,9 +1,9 @@
 # Eventra
 
 Eventra is a full-stack event registration system. Users can discover events,
-register for them, and manage their profiles. Administrators can participate in
-events as users while also managing events and reviewing activity from a
-dedicated dashboard.
+register for them, and manage their profiles. Administrators can participate in events as users while managing events with
+owner-assigned permissions. The owner also has a dedicated administration and
+audit dashboard.
 
 The repository is organized as two applications:
 
@@ -16,12 +16,13 @@ The repository is organized as two applications:
 
 - User registration, login, logout, profile updates, and password changes
 - JWT access and refresh token authentication
-- User and admin role-based route protection
+- User, admin, and owner role-based route protection
 - Event browsing and event details
 - Admin event creation, editing, deletion, and capacity management
 - Event registration with duplicate and capacity checks
 - Registration history and cancellation
-- Admin views for users and read-only registration activity
+- Owner dashboard for admin assignment and per-resource CRUD permissions
+- Owner audit view for admin event changes and admin view for user activity
 - AI-generated event descriptions with Google Gemini
 - Interactive OpenAPI documentation
 - Responsive dark red and black interface
@@ -56,7 +57,7 @@ eventra/
 │   │   ├── components/      # Shared and layout components
 │   │   ├── context/         # Authentication and toast state
 │   │   ├── lib/             # API client, endpoints, and formatters
-│   │   └── pages/           # Public, authenticated, and admin pages
+│   │   └── pages/           # Common, user, admin, and owner pages
 │   ├── public/              # Frontend assets
 │   └── README.md            # Frontend setup and architecture
 ├── package.json             # Root development script
@@ -72,17 +73,21 @@ eventra/
 
 ## Roles and permissions
 
-Both users and admins can browse events, register for events, cancel their own
-registrations, and view their personal registration history.
+Users, admins, and owners can browse events, register for events, cancel their
+own registrations, and view their personal registration history.
 
-Admins additionally can:
+The first registered account is the owner. `OWNER_EMAIL` can also be set to
+promote a configured existing account to owner when it logs in.
 
-- Create, edit, and delete events
-- View all registered users
-- View all registration activity in the read-only, searchable Activity page
+The owner can:
 
-The admin Activity page does not provide status-changing or deletion actions.
-An admin cannot delete their own account.
+- Promote users to admin or demote admins to users
+- Grant each admin independent read, create, update, and delete permissions
+  for events, users, and registrations
+- Review the append-only audit records for admin event changes
+
+Admins can only perform the CRUD operations explicitly granted by the owner.
+The admin User activity page shows registration and cancellation activity.
 
 ## Installation
 
