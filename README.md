@@ -22,7 +22,8 @@ The repository is organized as two applications:
 - Event registration with duplicate and capacity checks
 - Registration history and cancellation
 - Owner dashboard for admin assignment and per-resource CRUD permissions
-- Owner audit view for admin event changes and admin view for user activity
+- Owner audit view for admin event changes and permission-aware admin activity
+  management
 - AI-generated event descriptions with Google Gemini
 - Interactive OpenAPI documentation
 - Responsive dark red and black interface
@@ -87,7 +88,10 @@ The owner can:
 - Review the append-only audit records for admin event changes
 
 Admins can only perform the CRUD operations explicitly granted by the owner.
-The admin User activity page shows registration and cancellation activity.
+The frontend hides unavailable navigation and controls, while the backend
+enforces the same permissions for events, users, and registrations. Admins can
+create and update users, update registration status, and delete registrations
+when those permissions are granted.
 
 ## Installation
 
@@ -113,6 +117,7 @@ ACCESS_TOKEN_SECRET=replace_with_a_long_random_secret
 ACCESS_TOKEN_EXPIRY=1d
 REFRESH_TOKEN_SECRET=replace_with_another_long_random_secret
 REFRESH_TOKEN_EXPIRY=10d
+OWNER_EMAIL=owner@example.com
 GEMINI_API_KEY=your_gemini_api_key
 ```
 

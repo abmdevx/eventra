@@ -1,8 +1,9 @@
 # Eventra Backend
 
 The backend is the Eventra REST API. It provides authentication, event
-management, registrations, admin operations, and AI-generated event
-descriptions. Admins can also register for events as participants.
+management, registrations, owner-controlled admin permissions, audit logging,
+and AI-generated event descriptions. Admins can also register for events as
+participants.
 
 ## Stack
 
@@ -72,12 +73,13 @@ http://localhost:8000/api/v1
 | Health | `GET /health` |
 | Public users | `POST /users/create-user`, `POST /users/login-user`, `POST /users/refresh-access-token` |
 | Protected users | `GET /users/logout-user`, `PATCH /users/update-user/:id`, `PATCH /users/change-password`, `DELETE /users/delete-user/:id` |
-| Admin and owner users | `GET /users/get-all-users`, `GET /users/get-current-user`, `PATCH /users/owner/users/:id/access`, `GET /users/owner/activity` |
+| Managed users | `POST /users/create-managed-user` (requires `users.create`), `GET /users/get-all-users` (requires `users.read`) |
+| Owner administration | `PATCH /users/owner/users/:id/access`, `GET /users/owner/activity` |
 | Protected events | `GET /events/get-all-events`, `GET /events/get-event-id/:id` |
 | Admin events | `POST /events/create-event`, `PUT /events/update-event/:id`, `DELETE /events/delete-event/:id` |
 | AI descriptions | `POST /events/generate-description/:id` |
 | Registrations | `POST /registrations/create-registration`, `GET /registrations/get-my-registrations` |
-| Admin user activity | `GET /registrations/get-all-registrations` (read-only overview of users' registration records) |
+| Admin user activity | `GET /registrations/get-all-registrations`, `PUT /registrations/update-registration/:id`, `DELETE /registrations/delete-registration/:id` (permission-controlled registration activity management) |
 
 Protected routes expect:
 
@@ -86,7 +88,9 @@ Authorization: Bearer <access-token>
 ```
 
 Refresh-token and logout flows also use cookies. The frontend sends requests
-with credentials enabled.
+with credentials enabled. When an access token expires, the frontend
+automatically exchanges the stored refresh token and retries the failed
+request. If the refresh token is invalid or expired, the session is cleared.
 
 ## Source structure
 
@@ -117,5 +121,6 @@ cancelled
 
 Cancelling a registration preserves its history instead of removing the
 record. The admin user activity endpoint exposes those registration records for
-review. Owner admin activity is stored separately in the audit log and records
-admin event creation, updates, and deletions.
+review and allows status updates or deletion when the assigned permissions
+allow it. Owner admin activity is stored separately in the audit log and
+records admin event creation, updates, and deletions.

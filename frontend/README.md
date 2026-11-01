@@ -11,8 +11,10 @@ user pages, and admin management screens.
 - View separate active registrations and personal activity tabs
 - Login, registration, profile editing, and password changes
 - Protected user routes and admin-only routes
-- Admin event and user management
-- Read-only, searchable admin activity feed for all registrations and cancellations
+- Owner dashboard for assigning admins and configuring per-resource CRUD permissions
+- Permission-aware event, user, and registration management
+- Searchable admin activity feed with permission-controlled status and delete actions
+- Automatic access-token refresh using the refresh token
 - Toast notifications, loading states, confirmations, and reusable form
   components
 - Responsive dark red and black design
@@ -76,7 +78,7 @@ src/
 │   ├── user/                # Authenticated user pages
 │   ├── admin/               # Admin dashboard screens and event form
 │   ├── owner/               # Owner dashboard and audit screens
-│   └── ...                  # Common pages such as Home, Login, and Register
+│   └── ...                  # Common pages such as Home and NotFound
 ├── App.jsx                  # Application routes
 ├── index.css                # Tailwind import and application theme
 └── main.jsx                 # React entry point
@@ -98,10 +100,18 @@ Admins use the same participant features as regular users: they can browse
 events, register for events, cancel their own registrations, and review their
 personal registration history.
 
-Admin-only screens are available for event management, user management, and a
-read-only searchable Activity page. The Activity page shows all users'
-registration records, sorted by the latest record update, without status or
-delete controls.
+Owner-only screens are available for administrator assignment, CRUD permission
+configuration, and admin audit activity. Admin screens are rendered according
+to the permissions granted by the owner:
+
+- Events: read, create, update, and delete controls appear independently.
+- Users: admins can create and update user details, in addition to read and
+  delete access.
+- User activity: admins can view registrations, update their status, and
+  delete registrations according to their assigned permissions.
+
+The backend enforces every permission independently, even when a frontend
+control is hidden.
 
 ## Screenshots
 
