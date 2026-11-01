@@ -1,6 +1,6 @@
 import { createContext, useContext, useMemo, useState } from "react";
 import { usersApi } from "../lib/endpoints";
-import { setToken, ApiRequestError } from "../lib/api";
+import { setToken, setRefreshToken, ApiRequestError } from "../lib/api";
 
 const AuthContext = createContext(null);
 const USER_KEY = "eventra_user";
@@ -17,21 +17,23 @@ function loadStoredUser() {
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(loadStoredUser);
 
-  const persist = (loggedInUser, accessToken) => {
+  const persist = (loggedInUser, accessToken, refreshToken) => {
     setUser(loggedInUser);
     setToken(accessToken);
+    setRefreshToken(refreshToken);
     localStorage.setItem(USER_KEY, JSON.stringify(loggedInUser));
   };
 
   const clear = () => {
     setUser(null);
     setToken(null);
+    setRefreshToken(null);
     localStorage.removeItem(USER_KEY);
   };
 
   const login = async (email, password) => {
     const data = await usersApi.login({ email: email.trim().toLowerCase(), password });
-    persist(data.loggedInUser, data.accessToken);
+    persist(data.loggedInUser, data.accessToken, data.refreshToken);
     return data.loggedInUser;
   };
 

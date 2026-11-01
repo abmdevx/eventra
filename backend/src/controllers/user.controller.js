@@ -266,7 +266,7 @@ export const changePassword = AsyncHandler(async (req, res) => {
 // @desc  GET /api/users
 export const refreshAccessToken = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.findById(req.params.id);
-  const user_refresh_Token = req.cookies.refreshToken || req.body.refreshToken;
+  const user_refresh_Token = req.cookies?.refreshToken || req.body.refreshToken;
 
     if(!user_refresh_Token)
     {
@@ -275,7 +275,12 @@ export const refreshAccessToken = AsyncHandler(async (req, res) => {
 
     // at this point we have the token lets verify it
 
-    const decodedToken = jwt.verify(user_refresh_Token, process.env.REFRESH_TOKEN_SECRET);
+    let decodedToken;
+    try {
+      decodedToken = jwt.verify(user_refresh_Token, process.env.REFRESH_TOKEN_SECRET);
+    } catch {
+      throw new ApiError(401, "Refresh token is expired or invalid. Please log in again.");
+    }
 
     const user = await User.findById(decodedToken?._id);
 
