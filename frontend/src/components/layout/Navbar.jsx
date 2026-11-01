@@ -63,7 +63,7 @@ export default function Navbar() {
               </NavLink>}
               {isOwner && (
                 <>
-                  <NavLink to="/owner" className={linkClass}>Owner dashboard</NavLink>
+                  <NavLink to="/owner" end className={linkClass}>Owner dashboard</NavLink>
                   <NavLink to="/owner/activity" className={linkClass}>Admin activity</NavLink>
                 </>
               )}
@@ -145,7 +145,7 @@ export default function Navbar() {
                 </NavLink>}
                 {isOwner && (
                   <>
-                    <NavLink to="/owner" className={linkClass} onClick={() => setMenuOpen(false)}>Owner dashboard</NavLink>
+                    <NavLink to="/owner" end className={linkClass} onClick={() => setMenuOpen(false)}>Owner dashboard</NavLink>
                     <NavLink to="/owner/activity" className={linkClass} onClick={() => setMenuOpen(false)}>Admin activity</NavLink>
                   </>
                 )}
