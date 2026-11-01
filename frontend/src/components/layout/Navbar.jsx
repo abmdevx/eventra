@@ -83,7 +83,7 @@ export default function Navbar() {
                 ) : (
                   <TicketIcon className="h-4 w-4 text-brand-500" width={16} height={16} />
                 )}
-                <span className="max-w-[8rem] truncate font-medium">{user?.name}</span>
+                <span className="max-w-32 truncate font-medium">{user?.name}</span>
               </NavLink>
               <Button variant="ghost" size="sm" onClick={handleLogout}>
                 <LogOutIcon width={16} height={16} />

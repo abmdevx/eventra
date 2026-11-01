@@ -177,7 +177,7 @@ export default function AdminRegistrations() {
               </thead>
               <tbody className="divide-y divide-surface-border">
                 {activities.map((registration) => (
-                  <tr key={registration._id} className="transition-colors hover:bg-white/[0.02]">
+                  <tr key={registration._id} className="transition-colors hover:bg-white/2">
                     <td className="px-5 py-3">
                       <div className="font-medium text-zinc-200">
                         {registration.user?.name || "User removed"}

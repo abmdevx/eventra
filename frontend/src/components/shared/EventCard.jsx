@@ -12,8 +12,8 @@ export default function EventCard({ event }) {
 
   return (
     <Card hover className="group flex flex-col overflow-hidden rounded-xl">
-      <div className="relative h-20 bg-gradient-to-br from-brand-900/60 via-surface-2 to-surface-1">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(239,68,68,0.25),_transparent_60%)]" />
+      <div className="relative h-20 bg-linear-to-br from-brand-900/60 via-surface-2 to-surface-1">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,68,68,0.25),transparent_60%)]" />
         <div className="absolute bottom-3 left-4 flex h-11 w-11 flex-col items-center justify-center rounded-lg border border-white/10 bg-black/30 shadow-inner">
           <span className="text-[9px] font-bold tracking-wider text-brand-300">{month}</span>
           <span className="font-display text-lg font-bold leading-none text-white">{day}</span>

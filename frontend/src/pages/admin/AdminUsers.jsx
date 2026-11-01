@@ -155,7 +155,7 @@ export default function AdminUsers() {
               </thead>
               <tbody className="divide-y divide-surface-border">
                 {users.map((u) => (
-                  <tr key={u._id} className="transition-colors hover:bg-white/[0.02]">
+                  <tr key={u._id} className="transition-colors hover:bg-white/2">
                     <td className="px-5 py-3 font-medium text-zinc-200">
                       {u.name}
                       {String(u._id) === String(currentUser?._id) && (
