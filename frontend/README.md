@@ -73,8 +73,10 @@ src/
 │   └── format.js            # Display formatting helpers
 ├── pages/
 │   ├── auth/                # Login and registration
+│   ├── user/                # Authenticated user pages
 │   ├── admin/               # Admin dashboard screens and event form
-│   └── ...                  # Home, events, profile, and registrations
+│   ├── owner/               # Owner dashboard and audit screens
+│   └── ...                  # Common pages such as Home, Login, and Register
 ├── App.jsx                  # Application routes
 ├── index.css                # Tailwind import and application theme
 └── main.jsx                 # React entry point

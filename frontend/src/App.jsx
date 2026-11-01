@@ -2,12 +2,13 @@ import { Routes, Route, Navigate } from "react-router-dom";
 import AppLayout from "./components/layout/AppLayout";
 import ProtectedRoute from "./components/layout/ProtectedRoute";
 import AdminRoute from "./components/layout/AdminRoute";
+import OwnerRoute from "./components/layout/OwnerRoute";
 
 import Home from "./pages/Home";
-import Events from "./pages/Events";
-import EventDetail from "./pages/EventDetail";
-import MyRegistrations from "./pages/MyRegistrations";
-import Profile from "./pages/Profile";
+import Events from "./pages/user/Events";
+import EventDetail from "./pages/user/EventDetail";
+import MyRegistrations from "./pages/user/MyRegistrations";
+import Profile from "./pages/user/Profile";
 import NotFound from "./pages/NotFound";
 
 import Login from "./pages/auth/Login";
@@ -16,6 +17,8 @@ import Register from "./pages/auth/Register";
 import AdminEvents from "./pages/admin/AdminEvents";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminRegistrations from "./pages/admin/AdminRegistrations";
+import OwnerDashboard from "./pages/owner/OwnerDashboard";
+import OwnerActivity from "./pages/owner/OwnerActivity";
 
 export default function App() {
   return (
@@ -36,6 +39,10 @@ export default function App() {
           <Route path="/admin/events" element={<AdminEvents />} />
           <Route path="/admin/users" element={<AdminUsers />} />
           <Route path="/admin/registrations" element={<AdminRegistrations />} />
+        </Route>
+        <Route element={<OwnerRoute />}>
+          <Route path="/owner" element={<OwnerDashboard />} />
+          <Route path="/owner/activity" element={<OwnerActivity />} />
         </Route>
 
         <Route path="/404" element={<NotFound />} />

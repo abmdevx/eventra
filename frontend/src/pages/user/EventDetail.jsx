@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { eventsApi, registrationsApi } from "../lib/endpoints";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import { formatDateTime } from "../lib/format";
+import { eventsApi, registrationsApi } from "../../lib/endpoints";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { formatDateTime } from "../../lib/format";
 import {
   Badge,
   Button,
@@ -14,7 +14,7 @@ import {
   MapPinIcon,
   UsersIcon,
   TicketIcon,
-} from "../components/shared";
+} from "../../components/shared";
 
 export default function EventDetail() {
   const { id } = useParams();

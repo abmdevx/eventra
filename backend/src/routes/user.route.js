@@ -2,7 +2,7 @@ import { Router } from "express";
 
 // middlewares
 import { verifyJWT } from "../middleware/auth.middleware.js";
-import { verifyAdmin } from "../middleware/admin.middleware.js";
+import { verifyAdmin, verifyOwner, requirePermission } from "../middleware/admin.middleware.js";
 import { validate } from "../middleware/validate.middleware.js";
 
 // validations
@@ -18,6 +18,8 @@ import {
   changePassword,
   deleteUser,
   refreshAccessToken,  // BOTH USER AND ADMIN
+  updateAdminAccess,
+  getOwnerActivity,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -37,9 +39,10 @@ router.route("/update-user/:id").patch(validate(updateUserSchema), updateUser);
 router.route("/change-password").patch(validate(changePasswordSchema), changePassword);
 router.route("/delete-user/:id").delete(deleteUser);
 
-// Admin Routes
-router.use(verifyAdmin); 
-router.route("/get-all-users").get(getAllUsers);
+// Admin and owner routes
+router.route("/get-all-users").get(verifyAdmin, requirePermission("users", "read"), getAllUsers);
 router.route("/get-current-user").get(getCurrentUser);
+router.route("/owner/users/:id/access").patch(verifyOwner, updateAdminAccess);
+router.route("/owner/activity").get(verifyOwner, getOwnerActivity);
 
 export default router;

@@ -3,6 +3,7 @@ import ApiError from "../utils/apiError.js"
 import ApiResponse from "../utils/apiResponse.js"
 import AsyncHandler from "../utils/asyncHandler.js";
 import ai from "../utils/gemini.js";
+import { recordAudit } from "../utils/audit.js";
 
 // @desc  GET /api/events
 export const getAllEvents = AsyncHandler(async (req, res) =>{
@@ -62,6 +63,13 @@ export const createEvent = AsyncHandler(async (req, res) =>{
     throw new ApiError(500, "Event could not be created.");
   }
 
+  await recordAudit(req, {
+    action: "created",
+    resource: "event",
+    resourceId: event._id.toString(),
+    details: `Created event "${event.title}".`,
+  });
+
   return res
   .status(201)
   .json(new ApiResponse(
@@ -89,6 +97,13 @@ export const updateEvent = AsyncHandler(async (req, res) =>{
     throw new ApiError(400, "Event could not be updated.");
   }
 
+  await recordAudit(req, {
+    action: "updated",
+    resource: "event",
+    resourceId: event._id.toString(),
+    details: `Updated event "${event.title}".`,
+  });
+
   return res
   .status(200)
   .json(new ApiResponse(
@@ -107,6 +122,13 @@ export const deleteEvent = AsyncHandler(async (req, res) =>{
   if(!event) {
     throw new ApiError(400, "Event could not be deleted.");
   }
+
+  await recordAudit(req, {
+    action: "deleted",
+    resource: "event",
+    resourceId: event._id.toString(),
+    details: `Deleted event "${event.title}".`,
+  });
 
   return res
   .status(200)

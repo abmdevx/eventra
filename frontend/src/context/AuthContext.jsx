@@ -71,7 +71,9 @@ export function AuthProvider({ children }) {
     () => ({
       user,
       isAuthenticated: Boolean(user),
-      isAdmin: user?.role === "admin",
+      isAdmin: ["admin", "owner"].includes(user?.role),
+      isOwner: user?.role === "owner",
+      permissions: user?.permissions || {},
       login,
       register,
       logout,

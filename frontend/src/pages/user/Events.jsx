@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { eventsApi } from "../lib/endpoints";
+import { eventsApi } from "../../lib/endpoints";
 import {
   EventCard,
   EmptyState,
@@ -8,7 +8,7 @@ import {
   Select,
   SearchIcon,
   CalendarIcon,
-} from "../components/shared";
+} from "../../components/shared";
 
 export default function Events() {
   const [events, setEvents] = useState([]);

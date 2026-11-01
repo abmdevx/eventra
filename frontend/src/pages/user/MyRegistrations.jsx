@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { registrationsApi } from "../lib/endpoints";
-import { useToast } from "../context/ToastContext";
-import { formatDate, formatDateTime } from "../lib/format";
+import { registrationsApi } from "../../lib/endpoints";
+import { useToast } from "../../context/ToastContext";
+import { formatDate, formatDateTime } from "../../lib/format";
 import {
   Badge,
   Button,
@@ -13,7 +13,7 @@ import {
   TicketIcon,
   CalendarIcon,
   MapPinIcon,
-} from "../components/shared";
+} from "../../components/shared";
 
 export default function MyRegistrations() {
   const toast = useToast();

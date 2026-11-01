@@ -15,7 +15,8 @@ export const createUserSchema = z.object({
     .min(8, "Password must be at least 8 characters"),
 
   role: z
-    .enum(["user", "admin"])
+    .enum(["user", "admin", "owner"])
+    .optional()
 });
 
 // user.validation.js

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
-import { Button, Input, Card, Badge, Alert, ConfirmDialog } from "../components/shared";
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+import { Button, Input, Card, Badge, Alert, ConfirmDialog } from "../../components/shared";
 
 export default function Profile() {
   const { user, updateProfile, changePassword, deleteAccount } = useAuth();
