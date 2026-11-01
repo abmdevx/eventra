@@ -11,7 +11,10 @@ const linkClass = ({ isActive }) =>
   ].join(" ");
 
 export default function Navbar() {
-  const { isAuthenticated, isAdmin, isOwner, user, logout } = useAuth();
+  const { isAuthenticated, isAdmin, isOwner, user, logout, can } = useAuth();
+  const canManageEvents = isAdmin && ["read", "create", "update", "delete"].some((action) => can("events", action));
+  const canManageUsers = isAdmin && ["read", "create", "update", "delete"].some((action) => can("users", action));
+  const canViewUserActivity = isAdmin && can("registrations", "read");
   const navigate = useNavigate();
   const toast = useToast();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -49,15 +52,15 @@ export default function Navbar() {
           )}
           {isAdmin && (
             <>
-              <NavLink to="/admin/events" className={linkClass}>
+              {canManageEvents && <NavLink to="/admin/events" className={linkClass}>
                 Manage Events
-              </NavLink>
-              <NavLink to="/admin/users" className={linkClass}>
+              </NavLink>}
+              {canManageUsers && <NavLink to="/admin/users" className={linkClass}>
                 Users
-              </NavLink>
-              <NavLink to="/admin/registrations" className={linkClass}>
+              </NavLink>}
+              {canViewUserActivity && <NavLink to="/admin/registrations" className={linkClass}>
                 User activity
-              </NavLink>
+              </NavLink>}
               {isOwner && (
                 <>
                   <NavLink to="/owner" className={linkClass}>Owner dashboard</NavLink>
@@ -127,19 +130,19 @@ export default function Navbar() {
             )}
             {isAdmin && (
               <>
-                <NavLink to="/admin/events" className={linkClass} onClick={() => setMenuOpen(false)}>
+                {canManageEvents && <NavLink to="/admin/events" className={linkClass} onClick={() => setMenuOpen(false)}>
                   Manage Events
-                </NavLink>
-                <NavLink to="/admin/users" className={linkClass} onClick={() => setMenuOpen(false)}>
+                </NavLink>}
+                {canManageUsers && <NavLink to="/admin/users" className={linkClass} onClick={() => setMenuOpen(false)}>
                   Users
-                </NavLink>
-                <NavLink
+                </NavLink>}
+                {canViewUserActivity && <NavLink
                   to="/admin/registrations"
                   className={linkClass}
                   onClick={() => setMenuOpen(false)}
                 >
                   User activity
-                </NavLink>
+                </NavLink>}
                 {isOwner && (
                   <>
                     <NavLink to="/owner" className={linkClass} onClick={() => setMenuOpen(false)}>Owner dashboard</NavLink>

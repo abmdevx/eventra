@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { eventsApi } from "../../lib/endpoints";
 import { useToast } from "../../context/ToastContext";
+import { useAuth } from "../../context/AuthContext";
 import { formatDate } from "../../lib/format";
 import EventForm from "./EventForm";
 import {
@@ -16,8 +17,13 @@ import {
   TrashIcon,
   PlusIcon,
 } from "../../components/shared";
+import { NavLink } from "react-router-dom";
 
 export default function AdminEvents() {
+  const { can } = useAuth();
+  const canCreate = can("events", "create");
+  const canUpdate = can("events", "update");
+  const canDelete = can("events", "delete");
   const toast = useToast();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -84,10 +90,12 @@ export default function AdminEvents() {
           </h1>
           <p className="mt-1 text-sm text-zinc-500">Create, edit, and remove events.</p>
         </div>
-        <Button onClick={openCreate}>
-          <PlusIcon width={16} height={16} />
-          New event
-        </Button>
+        {canCreate && (
+          <Button onClick={openCreate}>
+            <PlusIcon width={16} height={16} />
+            New event
+          </Button>
+        )}
       </div>
 
       {loading && <Spinner full />}
@@ -100,8 +108,8 @@ export default function AdminEvents() {
         <EmptyState
           icon={<CalendarIcon width={22} height={22} />}
           title="No events yet"
-          description="Create your first event to get started."
-          action={<Button onClick={openCreate}>New event</Button>}
+          description={canCreate ? "Create your first event to get started." : "No events are available yet."}
+          action={canCreate ? <Button onClick={openCreate}>New event</Button> : null}
         />
       )}
 
@@ -126,14 +134,23 @@ export default function AdminEvents() {
                   </div>
                 </div>
                 <div className="flex shrink-0 items-center gap-2">
-                  <Button variant="secondary" size="sm" onClick={() => openEdit(event)}>
-                    <EditIcon width={14} height={14} />
-                    Edit
-                  </Button>
-                  <Button variant="danger" size="sm" onClick={() => setDeleteTarget(event)}>
-                    <TrashIcon width={14} height={14} />
-                    Delete
-                  </Button>
+                  {can("events", "read") && (
+                    <Button as={NavLink} to={`/events/${event._id}`} variant="secondary" size="sm">
+                      View event
+                    </Button>
+                  )}
+                  {canUpdate && (
+                    <Button variant="secondary" size="sm" onClick={() => openEdit(event)}>
+                      <EditIcon width={14} height={14} />
+                      Edit
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button variant="danger" size="sm" onClick={() => setDeleteTarget(event)}>
+                      <TrashIcon width={14} height={14} />
+                      Delete
+                    </Button>
+                  )}
                 </div>
               </Card>
             );

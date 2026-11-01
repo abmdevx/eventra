@@ -67,6 +67,9 @@ export function AuthProvider({ children }) {
     clear();
   };
 
+  const can = (resource, action) =>
+    user?.role === "owner" || user?.permissions?.[resource]?.[action] === true;
+
   const value = useMemo(
     () => ({
       user,
@@ -74,6 +77,7 @@ export function AuthProvider({ children }) {
       isAdmin: ["admin", "owner"].includes(user?.role),
       isOwner: user?.role === "owner",
       permissions: user?.permissions || {},
+      can,
       login,
       register,
       logout,

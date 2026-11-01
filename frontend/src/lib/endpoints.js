@@ -11,6 +11,7 @@ export const usersApi = {
   changePassword: (data) => api.patch("/users/change-password", data),
   remove: (id) => api.delete(`/users/delete-user/${id}`),
   getAll: () => api.get("/users/get-all-users"),
+  createManaged: (data) => api.post("/users/create-managed-user", data),
   getCurrent: () => api.get("/users/get-current-user"),
   updateAccess: (id, data) => api.patch(`/users/owner/users/${id}/access`, data),
   getOwnerActivity: () => api.get("/users/owner/activity"),

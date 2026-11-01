@@ -85,6 +85,19 @@ export const createUser = AsyncHandler(async (req, res) => {
   ))  
 });
 
+export const createUserByAdmin = AsyncHandler(async (req, res) => {
+  const { name, email, password } = req.body;
+  const normalizedEmail = email.trim().toLowerCase();
+  const existedUser = await User.findOne({ email: normalizedEmail });
+
+  if (existedUser) {
+    throw new ApiError(400, "An account with this email already exists.");
+  }
+
+  const user = await User.create({ name, email: normalizedEmail, password, role: "user" });
+  return res.status(201).json(new ApiResponse(201, user, "User created successfully."));
+});
+
 // @desc  POST /api/users
 export const loginUser = AsyncHandler(async (req, res) => {
   // TODO: const user = await User.create(req.body); res.status(201).json(user);
@@ -189,8 +202,9 @@ export const updateUser = AsyncHandler(async (req, res) => {
   // check here if email, name already exists
 
   const existedUser = await User.findOne({
+    _id: { $ne: req.params.id },
     $or : [{ name }, { email }]
-  })
+  });
 
   if(existedUser) {
     throw new ApiError(400, "User already exists.");

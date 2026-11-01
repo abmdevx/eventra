@@ -20,6 +20,7 @@ import {
   refreshAccessToken,  // BOTH USER AND ADMIN
   updateAdminAccess,
   getOwnerActivity,
+  createUserByAdmin,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -41,6 +42,12 @@ router.route("/delete-user/:id").delete(deleteUser);
 
 // Admin and owner routes
 router.route("/get-all-users").get(verifyAdmin, requirePermission("users", "read"), getAllUsers);
+router.route("/create-managed-user").post(
+  verifyAdmin,
+  requirePermission("users", "create"),
+  validate(createUserSchema.omit({ role: true })),
+  createUserByAdmin
+);
 router.route("/get-current-user").get(getCurrentUser);
 router.route("/owner/users/:id/access").patch(verifyOwner, updateAdminAccess);
 router.route("/owner/activity").get(verifyOwner, getOwnerActivity);
