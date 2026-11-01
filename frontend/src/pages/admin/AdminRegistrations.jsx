@@ -1,28 +1,43 @@
 import { useEffect, useMemo, useState } from "react";
 import { registrationsApi } from "../../lib/endpoints";
+import { useAuth } from "../../context/AuthContext";
 import { formatDateTime } from "../../lib/format";
 import {
   Badge,
+  Button,
   Card,
+  ConfirmDialog,
   EmptyState,
   Input,
   SearchIcon,
   Spinner,
   TicketIcon,
+  TrashIcon,
 } from "../../components/shared";
 
 const statusTone = { confirmed: "success", pending: "warning", cancelled: "neutral" };
 
 export default function AdminRegistrations() {
+  const { can } = useAuth();
+  const canRead = can("registrations", "read");
+  const canUpdate = can("registrations", "update");
+  const canDelete = can("registrations", "delete");
   const [registrations, setRegistrations] = useState([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [updating, setUpdating] = useState("");
 
   useEffect(() => {
     let mounted = true;
 
     (async () => {
+      if (!canRead) {
+        setLoading(false);
+        return;
+      }
       try {
         const data = await registrationsApi.getAll();
         if (mounted) setRegistrations(data || []);
@@ -36,7 +51,35 @@ export default function AdminRegistrations() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [canRead]);
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await registrationsApi.remove(deleteTarget._id);
+      setRegistrations((current) => current.filter((item) => item._id !== deleteTarget._id));
+      setDeleteTarget(null);
+    } catch (err) {
+      setError(err.message || "Could not delete registration");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleStatusUpdate = async (registration, status) => {
+    setUpdating(registration._id);
+    try {
+      const updated = await registrationsApi.update(registration._id, { status });
+      setRegistrations((current) =>
+        current.map((item) => item._id === registration._id ? { ...item, ...updated } : item)
+      );
+    } catch (err) {
+      setError(err.message || "Could not update registration");
+    } finally {
+      setUpdating("");
+    }
+  };
 
   const activities = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -99,7 +142,15 @@ export default function AdminRegistrations() {
         />
       )}
 
-      {!loading && !error && activities.length === 0 && (
+      {!loading && !error && !canRead && (
+        <EmptyState
+          icon={<TicketIcon width={22} height={22} />}
+          title="Registration list access is disabled"
+          description="This page requires registration read permission."
+        />
+      )}
+
+      {!loading && !error && canRead && activities.length === 0 && (
         <EmptyState
           icon={<TicketIcon width={22} height={22} />}
           title={query ? "No matching activity" : "No activity yet"}
@@ -111,7 +162,7 @@ export default function AdminRegistrations() {
         />
       )}
 
-      {!loading && !error && activities.length > 0 && (
+      {!loading && !error && canRead && activities.length > 0 && (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -121,6 +172,7 @@ export default function AdminRegistrations() {
                   <th className="px-5 py-3 font-medium">Event</th>
                   <th className="px-5 py-3 font-medium">Activity time</th>
                   <th className="px-5 py-3 font-medium">Status</th>
+                  {(canUpdate || canDelete) && <th className="px-5 py-3 font-medium text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody className="divide-y divide-surface-border">
@@ -141,10 +193,33 @@ export default function AdminRegistrations() {
                       {formatDateTime(registration.updatedAt || registration.createdAt)}
                     </td>
                     <td className="px-5 py-3">
-                      <Badge tone={statusTone[registration.status] || "neutral"}>
-                        {registration.status}
-                      </Badge>
+                      {canUpdate ? (
+                        <select
+                          value={registration.status}
+                          disabled={updating === registration._id}
+                          onChange={(event) => handleStatusUpdate(registration, event.target.value)}
+                          className="rounded-lg border border-surface-border bg-surface-2 px-2 py-1 text-xs text-zinc-200"
+                        >
+                          <option value="pending">pending</option>
+                          <option value="confirmed">confirmed</option>
+                          <option value="cancelled">cancelled</option>
+                        </select>
+                      ) : (
+                        <Badge tone={statusTone[registration.status] || "neutral"}>
+                          {registration.status}
+                        </Badge>
+                      )}
                     </td>
+                    {(canUpdate || canDelete) && (
+                      <td className="px-5 py-3 text-right">
+                        {canDelete && (
+                          <Button variant="danger" size="sm" onClick={() => setDeleteTarget(registration)}>
+                            <TrashIcon width={13} height={13} />
+                            Delete
+                          </Button>
+                        )}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -152,6 +227,16 @@ export default function AdminRegistrations() {
           </div>
         </Card>
       )}
+
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        loading={deleting}
+        title="Delete registration"
+        message={`Delete ${deleteTarget?.user?.name || "this user's"} registration for ${deleteTarget?.event?.title || "this event"}?`}
+        confirmLabel="Delete registration"
+      />
     </div>
   );
 }
